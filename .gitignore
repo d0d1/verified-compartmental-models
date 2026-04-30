@@ -1,0 +1,24 @@
+# .gitignore for Isabelle/HOL project
+# Isabelle output
+output/
+*.thy~
+*~
+
+# Isabelle heaps and logs
+.isabelle/
+heaps/
+
+# Build artifacts
+document/*.aux
+document/*.log
+document/*.out
+document/*.pdf
+document/*.bbl
+document/*.blg
+document/*.fdb_latexmk
+document/*.fls
+document/*.synctex.gz
+
+# OS
+.DS_Store
+Thumbs.db
