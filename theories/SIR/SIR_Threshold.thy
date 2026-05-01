@@ -11,7 +11,7 @@
 *)
 
 theory SIR_Threshold
-  imports SIR_Forward_Invariance
+  imports SIR_Monotonicity
 begin
 
 context SIR_solution
@@ -120,6 +120,75 @@ proof -
     using assms(1) \<open>\<beta> * S a \<le> \<gamma>\<close>
     by (simp add: mult_nonneg_nonpos)
   finally show ?thesis .
+qed
+
+theorem initial_epidemic_decline:
+  assumes "I a > 0" and "R_zero < 1"
+  shows "\<beta> * S a * I a - \<gamma> * I a < 0"
+proof -
+  have "\<beta> * S a < \<gamma>"
+    using assms(2) pos_gamma unfolding R_zero_def
+    by (simp add: field_simps)
+  then have "\<beta> * S a * I a - \<gamma> * I a = I a * (\<beta> * S a - \<gamma>)"
+    by (simp add: algebra_simps)
+  also have "\<dots> < 0"
+    using assms(1) \<open>\<beta> * S a < \<gamma>\<close>
+    by (simp add: mult_pos_neg)
+  finally show ?thesis .
+qed
+
+section \<open>Global Monotonicity of I under $R_0 \le 1$\<close>
+
+text \<open>
+  If $R_0 \le 1$, then $\beta S(t) \le \gamma$ for all $t \in [a,b]$
+  (since $S$ is nonincreasing), so $I'(t) = I(t)(\beta S(t) - \gamma) \le 0$
+  and $I$ is nonincreasing on the entire interval.
+\<close>
+
+lemma R_eff_nonincreasing:
+  assumes "t \<in> {a..b}"
+  shows "R_eff t \<le> R_zero"
+proof -
+  have "a \<le> t" using assms by auto
+  then have "S t \<le> S a" by (rule S_nonincreasing[OF a_in_interval assms])
+  then have "\<beta> * S t \<le> \<beta> * S a" using pos_beta by simp
+  then show ?thesis
+    unfolding R_eff_def R_zero_def using pos_gamma
+    by (simp add: divide_right_mono)
+qed
+
+lemma beta_S_le_gamma_if_R_zero_le_one:
+  assumes "R_zero \<le> 1" and "t \<in> {a..b}"
+  shows "\<beta> * S t \<le> \<gamma>"
+proof -
+  have "R_eff t \<le> R_zero" by (rule R_eff_nonincreasing[OF assms(2)])
+  also have "\<dots> \<le> 1" by (rule assms(1))
+  finally have "R_eff t \<le> 1" .
+  then show "\<beta> * S t \<le> \<gamma>"
+    unfolding R_eff_def using pos_gamma by (simp add: field_simps)
+qed
+
+theorem I_nonincreasing_if_R_zero_le_one:
+  assumes R0: "R_zero \<le> 1"
+    and s_in: "s \<in> {a..b}" and t_in: "t \<in> {a..b}" and st: "s \<le> t"
+  shows "I t \<le> I s"
+proof -
+  define f' where "f' \<equiv> \<lambda>u. \<beta> * S u * I u - \<gamma> * I u"
+  have df: "(I has_real_derivative f' u) (at u)" if "u \<in> {s..t}" for u
+  proof -
+    have "u \<in> {a..b}" using that s_in t_in by auto
+    then show ?thesis unfolding f'_def by (rule ode_I)
+  qed
+  have sign: "f' u \<le> 0" if "u \<in> {s..t}" for u
+  proof -
+    have u_ab: "u \<in> {a..b}" using that s_in t_in by auto
+    have "f' u = I u * (\<beta> * S u - \<gamma>)" unfolding f'_def by (simp add: algebra_simps)
+    also have "\<dots> \<le> 0"
+      using I_nonneg[OF u_ab] beta_S_le_gamma_if_R_zero_le_one[OF R0 u_ab]
+      by (simp add: mult_nonneg_nonpos)
+    finally show ?thesis .
+  qed
+  show ?thesis by (rule nonincreasing_from_nonpos_derivative[OF st df sign])
 qed
 
 text \<open>$R_e$ is nonincreasing (since $S$ is nonincreasing, proved elsewhere).\<close>
