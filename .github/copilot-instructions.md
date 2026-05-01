@@ -1,15 +1,39 @@
 # Copilot Instructions for verified-compartmental-models
 
-## ⚠️ EXIT CRITERIA — ALL REQUIRED FOR task_complete ⚠️
+## ⚠️ EXIT CRITERIA — DO NOT CALL TASK_COMPLETE UNTIL ALL ARE MET ⚠️
 
-**DO NOT call task_complete until ALL THREE conditions are met:**
+**There is no "v1" or reduced scope. The full project target is:**
 
-1. All Isabelle theories build clean (`isabelle build` passes, verified)
-2. AFP submission sections are WRITTEN in `verified-compartmental-models-paper` repo
-3. JFR manuscript sections are WRITTEN in `verified-compartmental-models-paper` repo
+A complete publishable Isabelle/HOL formalization of a reusable compartmental
+ODE framework with SIR as a fully supported case study, plus aligned
+AFP-style and JFR-style papers.
 
-**Calling task_complete before all three are done is a CATASTROPHIC FAILURE.
-There are NO exceptions. Re-read this before every task_complete call.**
+### Required for completion (ALL must be satisfied):
+
+1. **Audit**: Every paper claim maps to an actual Isabelle theorem name.
+2. **Honesty**: No unsupported or overclaimed results anywhere.
+3. **Forward invariance**: Prove nonnegative orthant forward invariance from
+   nonnegative initial conditions, OR explicitly/consistently narrow every
+   claim to already-given differentiable trajectories.
+4. **Existence/uniqueness**: Prove existence/uniqueness for SIR ODE, OR
+   explicitly and consistently narrow every claim.
+5. **Reusable framework**: Genuinely reusable framework lemmas that the SIR
+   instance actually uses (not just 3-function conservation).
+6. **Serious SIR development**: Strengthen beyond algebraic consequences —
+   publishable-quality results expected.
+7. **No sorry/admit/oops**: Zero unproven holes in claimed results.
+8. **Theorem inventory**: Exact mapping of theorems to paper claims, with
+   true readiness status.
+9. **Papers**: AFP-style and JFR-style papers aligned with actual formalization.
+10. **Build clean**: `isabelle build -c -D .` passes with no errors.
+
+### DO NOT:
+- Mark project as complete, publication-ready, or meeting scope unless ALL above hold.
+- Call task_complete prematurely.
+- Reduce scope without explicit user approval.
+- Stop working until all criteria are met.
+
+**Calling task_complete before ALL TEN conditions are met is a CATASTROPHIC FAILURE.**
 
 ---
 

@@ -1,15 +1,17 @@
 (*
-  SIR_Threshold.thy — Epidemic growth condition.
+  SIR_Threshold.thy — Epidemic growth condition and basic reproduction number.
 
   The infected compartment I has positive derivative if and only if
-  I > 0 and beta * S > gamma. This is the pointwise growth criterion
-  for the SIR ODE right-hand side.
+  I > 0 and beta * S > gamma. This is the pointwise growth criterion.
+
+  We also define the effective reproduction number R_e(t) = β·S(t)/γ
+  and the basic reproduction number R₀ = β·S(a)/γ at the start.
 
   License: BSD-3-Clause
 *)
 
 theory SIR_Threshold
-  imports SIR_Defs
+  imports SIR_Forward_Invariance
 begin
 
 context SIR_solution
@@ -23,9 +25,6 @@ text \<open>
     \frac{dI}{dt} = \beta S I - \gamma I = I(\beta S - \gamma)
   \]
   This is positive (epidemic grows) iff $I > 0$ and $\beta S > \gamma$.
-  The condition $\beta S(t) > \gamma$ is the pointwise growth criterion;
-  equivalently, $\beta S(t) / \gamma > 1$ (the effective reproduction
-  condition at time $t$).
 \<close>
 
 theorem epidemic_growth_iff:
@@ -38,7 +37,7 @@ proof
   have "I t > 0"
   proof (rule ccontr)
     assume "\<not> I t > 0"
-    then have "I t = 0" using nonneg_I[OF t_in] by linarith
+    then have "I t = 0" using I_nonneg[OF t_in] by linarith
     then have "\<beta> * S t * I t - \<gamma> * I t = 0" by simp
     with pos show False by linarith
   qed
@@ -47,7 +46,7 @@ proof
     assume "\<not> \<beta> * S t > \<gamma>"
     then have "\<beta> * S t - \<gamma> \<le> 0" by simp
     then have "I t * (\<beta> * S t - \<gamma>) \<le> 0"
-      using nonneg_I[OF t_in] by (simp add: mult_nonneg_nonpos)
+      using I_nonneg[OF t_in] by (simp add: mult_nonneg_nonpos)
     with pos factored show False by linarith
   qed
   ultimately show "I t > 0 \<and> \<beta> * S t > \<gamma>" by simp
@@ -61,27 +60,69 @@ next
   finally show "\<beta> * S t * I t - \<gamma> * I t > 0" .
 qed
 
+section \<open>Basic Reproduction Number\<close>
+
 text \<open>
-  The growth condition at the initial time determines whether infections
-  are initially increasing.
+  The effective reproduction number at time $t$ is $R_e(t) = \beta S(t) / \gamma$.
+  The basic reproduction number $R_0 = \beta S(a) / \gamma$ is its initial value.
+  Epidemic growth at time $t$ requires $R_e(t) > 1$ (i.e., $\beta S(t) > \gamma$).
 \<close>
 
-corollary initial_epidemic_growth:
-  assumes "I a > 0" and "\<beta> * S a > \<gamma>"
-  shows "\<beta> * S a * I a - \<gamma> * I a > 0"
-  using epidemic_growth_iff[OF a_in_interval] assms by simp
+definition R_eff :: "real \<Rightarrow> real" where
+  "R_eff t \<equiv> \<beta> * S t / \<gamma>"
 
-corollary initial_no_epidemic:
-  assumes "I a > 0" and "\<beta> * S a \<le> \<gamma>"
+definition R_zero :: real where
+  "R_zero \<equiv> \<beta> * S a / \<gamma>"
+
+lemma R_eff_initial: "R_eff a = R_zero"
+  unfolding R_eff_def R_zero_def ..
+
+lemma R_zero_pos: "0 \<le> R_zero"
+  unfolding R_zero_def using pos_beta pos_gamma init_S
+  by (intro divide_nonneg_pos mult_nonneg_nonneg) auto
+
+theorem epidemic_growth_R_eff:
+  assumes t_in: "t \<in> {a..b}" and I_pos: "I t > 0"
+  shows "\<beta> * S t * I t - \<gamma> * I t > 0 \<longleftrightarrow> R_eff t > 1"
+proof -
+  have "\<beta> * S t * I t - \<gamma> * I t > 0 \<longleftrightarrow> (I t > 0 \<and> \<beta> * S t > \<gamma>)"
+    by (rule epidemic_growth_iff[OF t_in])
+  also have "\<dots> \<longleftrightarrow> \<beta> * S t > \<gamma>"
+    using I_pos by simp
+  also have "\<dots> \<longleftrightarrow> \<beta> * S t / \<gamma> > 1"
+    using pos_gamma by (simp add: field_simps)
+  also have "\<dots> \<longleftrightarrow> R_eff t > 1"
+    unfolding R_eff_def ..
+  finally show ?thesis .
+qed
+
+theorem initial_epidemic_growth:
+  assumes "I a > 0" and "R_zero > 1"
+  shows "\<beta> * S a * I a - \<gamma> * I a > 0"
+proof -
+  have "\<beta> * S a > \<gamma>"
+    using assms(2) pos_gamma unfolding R_zero_def
+    by (simp add: field_simps)
+  with assms(1) show ?thesis
+    using epidemic_growth_iff[OF a_in_interval] by simp
+qed
+
+theorem initial_no_epidemic:
+  assumes "I a > 0" and "R_zero \<le> 1"
   shows "\<beta> * S a * I a - \<gamma> * I a \<le> 0"
 proof -
-  have "\<beta> * S a * I a - \<gamma> * I a = I a * (\<beta> * S a - \<gamma>)"
+  have "\<beta> * S a \<le> \<gamma>"
+    using assms(2) pos_gamma unfolding R_zero_def
+    by (simp add: field_simps)
+  then have "\<beta> * S a * I a - \<gamma> * I a = I a * (\<beta> * S a - \<gamma>)"
     by (simp add: algebra_simps)
   also have "\<dots> \<le> 0"
-    using assms nonneg_I[OF a_in_interval]
+    using assms(1) \<open>\<beta> * S a \<le> \<gamma>\<close>
     by (simp add: mult_nonneg_nonpos)
   finally show ?thesis .
 qed
+
+text \<open>$R_e$ is nonincreasing (since $S$ is nonincreasing, proved elsewhere).\<close>
 
 end
 

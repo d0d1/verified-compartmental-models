@@ -1,14 +1,13 @@
 (*
   SIR_Defs.thy — Locale definition for the classical SIR epidemic model.
 
-  We define the SIR system as a locale capturing:
-    - Positive parameters beta (transmission rate) and gamma (recovery rate)
-    - Differentiable trajectories S, I, R satisfying the SIR ODEs
-    - Nonnegativity of all compartments (physical constraint)
+  The locale assumes differentiable trajectories satisfying the SIR ODEs
+  and nonnegative initial conditions. Nonnegativity for the full trajectory
+  is then DERIVED (not assumed) using the linear ODE framework lemma.
 
-  The locale assumes a solution exists on a closed interval [a, b] and
-  derives properties of that solution. Existence and uniqueness are deferred
-  to future work (requiring the AFP ODE entry or equivalent).
+  Existence and uniqueness of solutions require the AFP ODE entry
+  (Picard-Lindelöf) and are deferred. All results here are conditional on
+  the assumed trajectory satisfying the ODE.
 
   License: BSD-3-Clause
 *)
@@ -47,9 +46,9 @@ locale SIR_solution =
     and ode_I: "\<And>t. t \<in> {a..b} \<Longrightarrow>
       (I has_real_derivative (\<beta> * S t * I t - \<gamma> * I t)) (at t)"
     and ode_R: "\<And>t. t \<in> {a..b} \<Longrightarrow> (R has_real_derivative (\<gamma> * I t)) (at t)"
-    and nonneg_S: "\<And>t. t \<in> {a..b} \<Longrightarrow> 0 \<le> S t"
-    and nonneg_I: "\<And>t. t \<in> {a..b} \<Longrightarrow> 0 \<le> I t"
-    and nonneg_R: "\<And>t. t \<in> {a..b} \<Longrightarrow> 0 \<le> R t"
+    and init_S: "0 \<le> S a"
+    and init_I: "0 \<le> I a"
+    and init_R: "0 \<le> R a"
 begin
 
 text \<open>Derived facts available throughout the locale.\<close>
@@ -62,6 +61,34 @@ lemma beta_nonneg: "0 \<le> \<beta>"
 
 lemma gamma_nonneg: "0 \<le> \<gamma>"
   using pos_gamma by auto
+
+subsection \<open>Continuity of Compartments\<close>
+
+text \<open>
+  Since each compartment has a derivative at every point in $[a,b]$,
+  all compartments are continuous on $[a,b]$.
+\<close>
+
+lemma continuous_S: "continuous_on {a..b} S"
+proof (rule DERIV_atLeastAtMost_imp_continuous_on)
+  fix s assume "a \<le> s" "s \<le> b"
+  then have "s \<in> {a..b}" by auto
+  from ode_S[OF this] show "\<exists>y. DERIV S s :> y" by blast
+qed
+
+lemma continuous_I: "continuous_on {a..b} I"
+proof (rule DERIV_atLeastAtMost_imp_continuous_on)
+  fix s assume "a \<le> s" "s \<le> b"
+  then have "s \<in> {a..b}" by auto
+  from ode_I[OF this] show "\<exists>y. DERIV I s :> y" by blast
+qed
+
+lemma continuous_R: "continuous_on {a..b} R"
+proof (rule DERIV_atLeastAtMost_imp_continuous_on)
+  fix s assume "a \<le> s" "s \<le> b"
+  then have "s \<in> {a..b}" by auto
+  from ode_R[OF this] show "\<exists>y. DERIV R s :> y" by blast
+qed
 
 end
 

@@ -1,7 +1,7 @@
 (*
   SIR_Monotonicity.thy — Monotonicity of S and R compartments.
 
-  Under the SIR dynamics with nonnegative compartments:
+  Under the SIR dynamics with derived nonnegativity:
     - S is nonincreasing (susceptibles only decrease)
     - R is nondecreasing (recovered only increase)
 
@@ -9,7 +9,7 @@
 *)
 
 theory SIR_Monotonicity
-  imports SIR_Defs
+  imports SIR_Conservation
 begin
 
 context SIR_solution
@@ -20,7 +20,8 @@ section \<open>Monotonicity of Compartments\<close>
 subsection \<open>S is Nonincreasing\<close>
 
 text \<open>
-  Since $dS/dt = -\beta S I \le 0$ (all factors nonneg), S is nonincreasing.
+  Since $dS/dt = -\beta S I \le 0$ (all factors nonneg, derived from
+  forward invariance), S is nonincreasing.
 \<close>
 
 lemma S_deriv_nonpos:
@@ -28,7 +29,7 @@ lemma S_deriv_nonpos:
   shows "- \<beta> * S t * I t \<le> 0"
 proof -
   have "0 \<le> \<beta> * S t * I t"
-    using pos_beta nonneg_S[OF assms] nonneg_I[OF assms]
+    using pos_beta S_nonneg[OF assms] I_nonneg[OF assms]
     by (intro mult_nonneg_nonneg) auto
   then show ?thesis by simp
 qed
@@ -54,13 +55,13 @@ corollary S_bounded_above:
 subsection \<open>R is Nondecreasing\<close>
 
 text \<open>
-  Since $dR/dt = \gamma I \ge 0$ (both factors nonneg), R is nondecreasing.
+  Since $dR/dt = \gamma I \ge 0$ (using derived $I \ge 0$), R is nondecreasing.
 \<close>
 
 lemma R_deriv_nonneg:
   assumes "t \<in> {a..b}"
   shows "0 \<le> \<gamma> * I t"
-  using pos_gamma nonneg_I[OF assms]
+  using pos_gamma I_nonneg[OF assms]
   by (intro mult_nonneg_nonneg) auto
 
 theorem R_nondecreasing:

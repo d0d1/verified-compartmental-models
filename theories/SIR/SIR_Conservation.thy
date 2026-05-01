@@ -8,7 +8,7 @@
 *)
 
 theory SIR_Conservation
-  imports SIR_Defs
+  imports SIR_Forward_Invariance
 begin
 
 context SIR_solution

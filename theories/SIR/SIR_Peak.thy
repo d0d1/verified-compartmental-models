@@ -9,7 +9,7 @@
 *)
 
 theory SIR_Peak
-  imports SIR_Defs
+  imports SIR_Forward_Invariance
 begin
 
 context SIR_solution

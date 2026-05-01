@@ -9,10 +9,12 @@
 
 theory SIR_Main
   imports
+    SIR_Forward_Invariance
     SIR_Conservation
     SIR_Monotonicity
     SIR_Threshold
     SIR_Peak
+    SIR_Phase_Plane
     SIR_Invariant
 begin
 
@@ -23,43 +25,61 @@ text \<open>
   SIR epidemic model on a closed interval $[a, b]$ with parameters
   $\beta > 0$ (transmission rate) and $\gamma > 0$ (recovery rate).
 
-  Assuming the solution exists with nonnegative compartments, we have proved:
+  The locale assumes only the ODE equations and \emph{nonneg initial conditions}.
+  All trajectory-level properties (nonnegativity, boundedness, monotonicity)
+  are \emph{derived}, not assumed.
 
+  \paragraph{Forward Invariance (from initial conditions only).}
+  \begin{enumerate}
+    \item \textbf{S nonneg} (@{thm [source] SIR_solution.S_nonneg}):
+      $S(t) \ge 0$ derived from $S(a) \ge 0$ using the integrating factor method.
+    \item \textbf{I nonneg} (@{thm [source] SIR_solution.I_nonneg}):
+      $I(t) \ge 0$ derived from $I(a) \ge 0$ using the integrating factor method.
+    \item \textbf{R nonneg} (@{thm [source] SIR_solution.R_nonneg}):
+      $R(t) \ge 0$ derived from $R(a) \ge 0$ and $I \ge 0$.
+  \end{enumerate}
+
+  \paragraph{Solution Formulas.}
+  \begin{enumerate}
+    \item \textbf{S solution} (@{thm [source] SIR_solution.S_solution}):
+      $S(t) = S(a) \cdot \exp(-\beta \int_a^t I)$.
+    \item \textbf{I solution} (@{thm [source] SIR_solution.I_solution}):
+      $I(t) = I(a) \cdot \exp(\int_a^t (\beta S - \gamma))$.
+  \end{enumerate}
+
+  \paragraph{Structural Properties.}
   \begin{enumerate}
     \item \textbf{Conservation} (@{thm [source] SIR_solution.conservation}):
       $S(t) + I(t) + R(t) = S(a) + I(a) + R(a)$ for all $t \in [a,b]$.
-
     \item \textbf{Monotonicity of S} (@{thm [source] SIR_solution.S_nonincreasing}):
       $S$ is nonincreasing on $[a,b]$.
-
     \item \textbf{Monotonicity of R} (@{thm [source] SIR_solution.R_nondecreasing}):
       $R$ is nondecreasing on $[a,b]$.
-
-    \item \textbf{Epidemic growth condition} (@{thm [source] SIR_solution.epidemic_growth_iff}):
-      $dI/dt > 0$ iff $I > 0$ and $\beta S > \gamma$.
-
-    \item \textbf{Stationary infection condition} (@{thm [source] SIR_solution.peak_iff}):
-      $dI/dt = 0$ with $I > 0$ iff $S = \gamma/\beta$.
-      This characterizes the critical susceptible level at which the
-      epidemic transitions from growing to declining.
+    \item \textbf{Boundedness} (@{thm [source] SIR_solution.compartment_bounds}):
+      $0 \le X(t) \le N$ for $X \in \{S, I, R\}$.
   \end{enumerate}
 
-  The conservation theorem is an instantiation of the generic
-  @{thm [source] three_compartment_conservation} from the reusable
-  compartmental model framework; similarly the monotonicity results
-  use the framework corollaries
-  @{thm [source] nonincreasing_from_nonpos_derivative} and
+  \paragraph{Epidemic Dynamics.}
+  \begin{enumerate}
+    \item \textbf{Growth condition} (@{thm [source] SIR_solution.epidemic_growth_iff}):
+      $dI/dt > 0$ iff $I > 0$ and $\beta S > \gamma$.
+    \item \textbf{Reproduction number} (@{thm [source] SIR_solution.epidemic_growth_R_eff}):
+      Growth iff $R_e(t) = \beta S(t)/\gamma > 1$.
+    \item \textbf{Peak condition} (@{thm [source] SIR_solution.peak_iff}):
+      $dI/dt = 0$ with $I > 0$ iff $S = \gamma/\beta$.
+    \item \textbf{KM invariant} (@{thm [source] SIR_solution.KM_invariant_value}):
+      $I + S - (\gamma/\beta)\ln S$ is constant (Kermack-McKendrick first integral).
+  \end{enumerate}
+
+  The forward invariance results use the generic
+  @{thm [source] linear_ode_solution} framework theorem (integrating factor
+  method). Conservation uses @{thm [source] three_compartment_conservation}.
+  Monotonicity uses @{thm [source] nonincreasing_from_nonpos_derivative} and
   @{thm [source] nondecreasing_from_nonneg_derivative}.
 
-  Nonnegativity of compartments is assumed; existence and uniqueness of
-  solutions are deferred to future work using the AFP ODE infrastructure.
-
-  Additionally, we prove that the assumed nonnegativity together with
-  conservation yields upper bounds on all compartments: each is bounded
-  by the total population $N$
-  (@{thm [source] SIR_solution.compartment_bounds}).
-  Note that nonnegativity is a locale assumption for the full trajectory,
-  not a forward-invariance result from initial conditions.
+  Existence and uniqueness of solutions is NOT proved; it would require the
+  Picard-Lindel\"of theorem from the AFP ODE entry. All results are conditional
+  on an assumed differentiable trajectory satisfying the SIR ODE system.
 \<close>
 
 end

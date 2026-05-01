@@ -5,7 +5,7 @@ session Verified_Compartmental_Models = "HOL-Analysis" +
     Proves conservation, monotonicity, epidemic threshold, stationary infection
     condition, and simplex invariance (boundedness of all compartments).
   \<close>
-  options [timeout = 600, document = pdf, document_output = output]
+  options [timeout = 1200, document = pdf, document_output = output]
   directories
     "theories/Framework"
     "theories/SIR"
