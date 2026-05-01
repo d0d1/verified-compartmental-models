@@ -6,11 +6,18 @@ ODE models, with the classical SIR epidemic model as the flagship instantiation.
 ## Overview
 
 This project provides machine-checked formalizations of:
+- **Forward invariance** — nonnegativity of each compartment derived from
+  nonneg initial conditions via the integrating factor technique
 - **Conservation laws** for compartmental systems (total population is constant)
 - **Monotonicity** of susceptible and recovered compartments
-- **Epidemic threshold** condition (basic reproduction number R₀)
+- **Phase plane invariant** — the Kermack–McKendrick invariant V = I + S − (γ/β)ln S
+- **Epidemic threshold** — basic reproduction number R₀ = βS(a)/γ with global
+  I-monotonicity when R₀ ≤ 1
 - **Stationary infection** condition (peak of the infection curve)
 - **Simplex invariance** (all compartments bounded between 0 and N)
+
+All results hold for assumed differentiable trajectories satisfying the SIR ODE.
+The framework provides generic lemmas that are reused by the SIR instance.
 
 ## Theory Structure
 
@@ -18,17 +25,19 @@ This project provides machine-checked formalizations of:
 
 | Theory | Contents |
 |--------|----------|
-| `Compartmental_Model` | Reusable three-compartment conservation theorem; monotonicity corollaries for compartments with sign-definite derivatives |
+| `Compartmental_Model` | Generic linear ODE solution via integrating factor; sign preservation (`linear_ode_nonneg`, `linear_ode_pos`); `nonneg_deriv_nonneg`; three-compartment conservation; monotonicity corollaries |
 
 ### SIR Instantiation (`theories/SIR/`)
 
 | Theory | Contents |
 |--------|----------|
-| `SIR_Defs` | Locale `SIR_solution` fixing S, I, R, β, γ with ODE and regularity assumptions |
+| `SIR_Defs` | Locale `SIR_solution` fixing S, I, R, β, γ with ODE and regularity assumptions; assumes only S(a)≥0, I(a)≥0, R(a)≥0 |
+| `SIR_Forward_Invariance` | Derives S≥0, I≥0, R≥0 from initial conditions via `linear_ode_nonneg` and `nonneg_deriv_nonneg` |
 | `SIR_Conservation` | Total population N = S + I + R is constant (via framework) |
-| `SIR_Monotonicity` | S is nonincreasing, R is nondecreasing (via framework corollaries) |
-| `SIR_Threshold` | Epidemic growth iff S > γ/β; basic reproduction number R₀ = βS₀/γ |
+| `SIR_Monotonicity` | S is nonincreasing, R is nondecreasing (via framework + forward invariance) |
+| `SIR_Threshold` | Epidemic growth iff S > γ/β; R₀ = βS(a)/γ; `initial_epidemic_decline`; `I_nonincreasing_if_R_zero_le_one` |
 | `SIR_Peak` | Stationary infection condition: I'(t) = 0 iff S(t) = γ/β |
+| `SIR_Phase_Plane` | Kermack–McKendrick invariant: V(t) = const on trajectories with S > 0 |
 | `SIR_Invariant` | Simplex boundedness: 0 ≤ X(t) ≤ N for each compartment X |
 | `SIR_Main` | Entry point importing all theories; summary documentation |
 
@@ -48,16 +57,29 @@ Requires **Isabelle 2024** with the `HOL-Analysis` heap pre-built.
 isabelle build -d . Verified_Compartmental_Models
 ```
 
-## Assumptions and Limitations (v1)
+Build time: ~12 seconds on a modern machine.
 
-- **Nonnegativity is assumed**, not derived from ODE theory. Proving it requires
-  a vector-valued ODE invariant argument (Picard–Lindelöf + forward invariance
-  of the nonneg orthant), which is planned for v2.
+## Assumptions and Scope
+
+- **Trajectories assumed**: the locale assumes differentiable functions satisfying
+  the SIR ODE. Existence/uniqueness (Picard–Lindelöf) is not proved here because
+  the AFP ODE library is not installed; all results are conditional on the assumed
+  trajectory.
+- **Nonnegativity derived**: forward invariance is proved from nonneg initial
+  conditions using the integrating factor, without requiring Picard–Lindelöf.
 - The framework handles **three-compartment** models. Generalization to
-  n-compartment models via finite sums is planned for v2.
-- Derivative assumptions use `at t` (full neighbourhood) rather than
-  `at t within {a..b}` (one-sided at endpoints). This is slightly stronger than
-  necessary but simplifies proofs.
+  n-compartment models via finite sums is planned for future work.
+- Derivative assumptions use `at t within {a..b}` (within-derivatives on closed
+  intervals).
+
+## Artifact Metadata
+
+- **Isabelle version**: 2024
+- **ML platform**: Poly/ML 5.9.1 (x86_64_32-linux)
+- **Session**: HOL-Analysis
+- **Theorem count**: 56 theorems/lemmas/corollaries/definitions
+- **Proof holes**: 0 (zero sorry/admit/oops)
+- **Companion paper**: [verified-compartmental-models-paper](https://github.com/d0d1/verified-compartmental-models-paper)
 
 ## Dependencies
 
