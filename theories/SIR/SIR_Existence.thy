@@ -203,6 +203,17 @@ proof -
   then show ?thesis using assms by (rule sir_c1.closed_segment_subset_existence_ivl)
 qed
 
+lemma sir_ivl_subset:
+  assumes "t \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0" "0 \<le> t"
+  shows "{0..t} \<subseteq> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
+  using sir_segment_subset[OF assms(1)] assms(2)
+  by (simp add: closed_segment_eq_real_ivl)
+
+lemma sir_ivl_mem:
+  assumes "t \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0" "0 \<le> s" "s \<le> t"
+  shows "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
+  using sir_ivl_subset[OF assms(1)] assms(2,3) by auto
+
 lemma sir_flow_continuous_on:
   "continuous_on (sir_c1.existence_ivl0 \<beta> \<gamma> x0) (sir_c1.flow0 \<beta> \<gamma> x0)"
 proof -
@@ -324,9 +335,7 @@ lemma sir_flow_continuous_on_segment:
   shows "continuous_on {0..t} (\<lambda>s. sir_c1.flow0 \<beta> \<gamma> x0 s $ i)"
 proof -
   have seg: "{0..t} \<subseteq> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
-    using sir_segment_subset
-      assms sir_local_existence
-    by (simp add: closed_segment_eq_real_ivl)
+    by (rule sir_ivl_subset[OF assms])
   show ?thesis
     by (intro continuous_on_subset[OF _ seg]
          continuous_on_compose2[OF continuous_on_vec_nth sir_flow_continuous_on subset_refl])
@@ -349,9 +358,7 @@ next
   have S_ode: "(?S has_real_derivative (?f s * ?S s)) (at s)" if "s \<in> {0..t}" for s
   proof -
     have s_in: "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
-      using sir_segment_subset
-        t_in sir_local_existence that
-      by (auto simp: closed_segment_eq_real_ivl)
+      using sir_ivl_mem[OF t_in _ _] that by auto
     have "((\<lambda>t. ?fl t $ 1) has_real_derivative (sir_vf \<beta> \<gamma> (?fl s)) $ 1) (at s)"
       by (rule sir_flow_component_deriv[OF s_in])
     also have "(sir_vf \<beta> \<gamma> (?fl s)) $ 1 = - \<beta> * (?fl s $ 1) * (?fl s $ 2)"
@@ -384,9 +391,7 @@ next
   have I_ode: "(?I_comp has_real_derivative (?f s * ?I_comp s)) (at s)" if "s \<in> {0..t}" for s
   proof -
     have s_in: "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
-      using sir_segment_subset
-        t_in sir_local_existence that
-      by (auto simp: closed_segment_eq_real_ivl)
+      using sir_ivl_mem[OF t_in _ _] that by auto
     have "((\<lambda>t. ?fl t $ 2) has_real_derivative (sir_vf \<beta> \<gamma> (?fl s)) $ 2) (at s)"
       by (rule sir_flow_component_deriv[OF s_in])
     also have "(sir_vf \<beta> \<gamma> (?fl s)) $ 2 = \<beta> * (?fl s $ 1) * (?fl s $ 2) - \<gamma> * (?fl s $ 2)"
@@ -419,9 +424,7 @@ next
   proof -
     fix s assume "s \<in> {0..t}"
     then have s_in: "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
-      using sir_segment_subset
-        t_in sir_local_existence
-      by (auto simp: closed_segment_eq_real_ivl)
+      using sir_ivl_mem[OF t_in] by auto
     have "((\<lambda>t. ?fl t $ 3) has_real_derivative (sir_vf \<beta> \<gamma> (?fl s)) $ 3) (at s)"
       by (rule sir_flow_component_deriv[OF s_in])
     then show "((\<lambda>t. ?fl t $ 3) has_real_derivative \<gamma> * (?fl s $ 2)) (at s)"
@@ -431,9 +434,7 @@ next
   proof -
     fix s assume "s \<in> {0..t}"
     then have s_in: "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
-      using sir_segment_subset
-        t_in sir_local_existence
-      by (auto simp: closed_segment_eq_real_ivl)
+      using sir_ivl_mem[OF t_in] by auto
     have "0 \<le> s" using \<open>s \<in> {0..t}\<close> by auto
     then show "0 \<le> \<gamma> * (?fl s $ 2)"
       using sir_flow_nonneg_I[OF assms(1-5) s_in] assms(2) by auto
@@ -469,7 +470,7 @@ proof -
       proof -
         fix i :: 3
         have "x$i \<ge> 0 \<and> x$i \<le> N"
-          using h exhaust_3[of i] by linarith
+          using h by (cases i rule: exhaust_3) linarith+
         then show "\<bar>x$i\<bar> \<le> N" by auto
       qed
       have "norm x \<le> sum (\<lambda>i. \<bar>x$i\<bar>) UNIV"
@@ -658,9 +659,8 @@ proof -
   have y0: "y 0 = x\<^sub>0"
     using assms(5-7) unfolding y_def x\<^sub>0_def by auto
   have seg: "{0..b} \<subseteq> sir_c1.existence_ivl0 \<beta> \<gamma> x\<^sub>0"
-    using sir_segment_subset
-      global_existence[of b] assms(1)
-    by (auto simp: closed_segment_eq_real_ivl)
+    using sir_ivl_subset global_existence[of b] assms(1)
+    by auto
   have y_vderiv: "(y has_vderiv_on (\<lambda>s. sir_vf \<beta> \<gamma> (y s))) {0..b}"
     unfolding has_vderiv_on_def
   proof

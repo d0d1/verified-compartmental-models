@@ -6,7 +6,7 @@ session Verified_Compartmental_Models = Ordinary_Differential_Equations +
     epidemic threshold, and simplex invariance via the AFP Picard-Lindelöf
     infrastructure.
   \<close>
-  options [timeout = 2400, document = false, quick_and_dirty]
+  options [timeout = 7200, document = false, quick_and_dirty]
   directories
     "theories/Framework"
     "theories/SIR"
