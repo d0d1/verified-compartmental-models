@@ -36,11 +36,14 @@ qed
 theorem S_nonincreasing:
   assumes s_in: "s \<in> {a..b}" and t_in: "t \<in> {a..b}" and st: "s \<le> t"
   shows "S t \<le> S s"
-proof (rule DERIV_nonpos_imp_nonincreasing[OF st])
-  fix x assume "s \<le> x" "x \<le> t"
-  then have x_in: "x \<in> {a..b}" using s_in t_in by auto
-  show "\<exists>y. DERIV S x :> y \<and> y \<le> 0"
-    using ode_S[OF x_in] S_deriv_nonpos[OF x_in] by blast
+proof (rule nonincreasing_from_nonpos_derivative[OF st])
+  fix u assume "u \<in> {s..t}"
+  then have u_in: "u \<in> {a..b}" using s_in t_in by auto
+  show "(S has_real_derivative (- \<beta> * S u * I u)) (at u)" by (rule ode_S[OF u_in])
+next
+  fix u assume "u \<in> {s..t}"
+  then have u_in: "u \<in> {a..b}" using s_in t_in by auto
+  show "- \<beta> * S u * I u \<le> 0" by (rule S_deriv_nonpos[OF u_in])
 qed
 
 corollary S_bounded_above:
@@ -63,11 +66,14 @@ lemma R_deriv_nonneg:
 theorem R_nondecreasing:
   assumes s_in: "s \<in> {a..b}" and t_in: "t \<in> {a..b}" and st: "s \<le> t"
   shows "R s \<le> R t"
-proof (rule DERIV_nonneg_imp_nondecreasing[OF st])
-  fix x assume "s \<le> x" "x \<le> t"
-  then have x_in: "x \<in> {a..b}" using s_in t_in by auto
-  show "\<exists>y. DERIV R x :> y \<and> y \<ge> 0"
-    using ode_R[OF x_in] R_deriv_nonneg[OF x_in] by blast
+proof (rule nondecreasing_from_nonneg_derivative[OF st])
+  fix u assume "u \<in> {s..t}"
+  then have u_in: "u \<in> {a..b}" using s_in t_in by auto
+  show "(R has_real_derivative (\<gamma> * I u)) (at u)" by (rule ode_R[OF u_in])
+next
+  fix u assume "u \<in> {s..t}"
+  then have u_in: "u \<in> {a..b}" using s_in t_in by auto
+  show "0 \<le> \<gamma> * I u" by (rule R_deriv_nonneg[OF u_in])
 qed
 
 corollary R_bounded_below:

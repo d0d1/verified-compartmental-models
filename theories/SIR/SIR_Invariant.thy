@@ -86,7 +86,9 @@ text \<open>
 
 corollary simplex_invariant:
   assumes "t \<in> {a..b}"
-  shows "0 \<le> S t" and "0 \<le> I t" and "0 \<le> R t"
+  shows "0 \<le> S t" and "S t \<le> total_population"
+    and "0 \<le> I t" and "I t \<le> total_population"
+    and "0 \<le> R t" and "R t \<le> total_population"
     and "S t + I t + R t = total_population"
   using S_bounded[OF assms] I_bounded[OF assms] R_bounded[OF assms]
         conservation_N[OF assms]
