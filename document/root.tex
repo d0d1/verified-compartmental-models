@@ -1,0 +1,59 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{isabelle,isabellesym}
+\usepackage{amsmath,amssymb}
+\usepackage{pdfsetup}
+
+\urlstyle{rm}
+\isabellestyle{it}
+
+\begin{document}
+
+\title{Verified Compartmental Models: A Reusable Framework\\with SIR Instantiation}
+\author{David D.}
+\maketitle
+
+\begin{abstract}
+We present a reusable Isabelle/HOL framework for certified reasoning about
+compartmental ODE models, together with a complete instantiation for the
+classical SIR (Susceptible--Infectious--Recovered) epidemic model.
+
+The framework provides a generic conservation theorem for three-compartment
+systems, along with monotonicity lemmas derived from the sign of derivatives.
+The SIR instantiation proves five key properties: conservation of total
+population, monotonicity of the susceptible and recovered compartments,
+the epidemic threshold condition, and the stationary infection condition
+at the critical susceptible level $S = \gamma/\beta$.
+
+Nonnegativity of compartments is assumed; existence and uniqueness of
+solutions are deferred to future work leveraging the AFP ODE infrastructure.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+Compartmental models are a cornerstone of mathematical epidemiology,
+pharmacokinetics, and systems biology. The SIR model, introduced by
+Kermack and McKendrick~\cite{kermack1927}, partitions a population into susceptible~(S),
+infectious~(I), and recovered~(R) compartments governed by a system of ODEs.
+
+This development formalizes the key qualitative properties of the SIR model
+in Isabelle/HOL, structured as a reusable compartmental model framework
+with the SIR model as its first instantiation.
+
+\paragraph{Contributions.}
+\begin{itemize}
+\item A generic three-compartment conservation theorem.
+\item Monotonicity corollaries for compartments with signed derivatives.
+\item A locale-based SIR formalization proving conservation, monotonicity,
+      the epidemic threshold, and the stationary infection condition.
+\end{itemize}
+
+% generated text of all theories
+\input{session}
+
+\bibliographystyle{abbrv}
+\bibliography{root}
+
+\end{document}
