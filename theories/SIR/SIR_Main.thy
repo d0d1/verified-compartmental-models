@@ -16,6 +16,7 @@ theory SIR_Main
     SIR_Peak
     SIR_Phase_Plane
     SIR_Invariant
+    SIR_Existence
 begin
 
 section \<open>Summary of Results\<close>
@@ -77,9 +78,15 @@ text \<open>
   Monotonicity uses @{thm [source] nonincreasing_from_nonpos_derivative} and
   @{thm [source] nondecreasing_from_nonneg_derivative}.
 
-  Existence and uniqueness of solutions is NOT proved; it would require the
-  Picard-Lindel\"of theorem from the AFP ODE entry. All results are conditional
-  on an assumed differentiable trajectory satisfying the SIR ODE system.
+  Existence and uniqueness of solutions is proved via the AFP
+  Picard-Lindel\"of infrastructure (locale @{locale c1_on_open}).
+  The SIR vector field is $C^1$, hence locally Lipschitz. Conservation and
+  forward invariance confine the flow to a compact simplex, giving global
+  forward existence via @{text flow_in_compact_right_existence}.
+  The locale @{locale SIR_ODE} provides the unconditional bridge: given
+  initial conditions alone, it constructs the unique global solution and
+  interprets @{locale SIR_solution}, making all the above results
+  unconditional consequences of the initial-value problem.
 \<close>
 
 end

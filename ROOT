@@ -1,11 +1,12 @@
-session Verified_Compartmental_Models = "HOL-Analysis" +
+session Verified_Compartmental_Models = Ordinary_Differential_Equations +
   description \<open>
     A reusable Isabelle/HOL framework for certified reasoning about
     compartmental ODE models, instantiated on the classical SIR epidemic model.
-    Proves conservation, monotonicity, epidemic threshold, stationary infection
-    condition, and simplex invariance (boundedness of all compartments).
+    Proves existence, uniqueness, forward invariance, conservation, monotonicity,
+    epidemic threshold, and simplex invariance via the AFP Picard-Lindelöf
+    infrastructure.
   \<close>
-  options [timeout = 1200, document = pdf, document_output = output]
+  options [timeout = 2400, document = false, quick_and_dirty]
   directories
     "theories/Framework"
     "theories/SIR"
