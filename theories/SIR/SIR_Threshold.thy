@@ -1,9 +1,9 @@
 (*
-  SIR_Threshold.thy — Epidemic threshold (initial growth condition).
+  SIR_Threshold.thy — Epidemic growth condition.
 
-  The infected compartment I is initially increasing if and only if
-  the basic reproduction condition beta * S(a) > gamma holds (with I(a) > 0).
-  This is equivalent to R_0 * S(a)/N > 1 where R_0 = beta/gamma.
+  The infected compartment I has positive derivative if and only if
+  I > 0 and beta * S > gamma. This is the pointwise growth criterion
+  for the SIR ODE right-hand side.
 
   License: BSD-3-Clause
 *)
@@ -15,7 +15,7 @@ begin
 context SIR_solution
 begin
 
-section \<open>Epidemic Threshold\<close>
+section \<open>Epidemic Growth Condition\<close>
 
 text \<open>
   The derivative of $I$ at time $t$ is:
@@ -23,10 +23,9 @@ text \<open>
     \frac{dI}{dt} = \beta S I - \gamma I = I(\beta S - \gamma)
   \]
   This is positive (epidemic grows) iff $I > 0$ and $\beta S > \gamma$.
-  The condition $\beta S(a) > \gamma$ at the start of the epidemic is
-  the classical \emph{threshold condition}. In terms of the basic
-  reproduction number $R_0 = \beta / \gamma$, this reads $R_0 \cdot S(a) / N > 1$
-  (when $N$ is normalized to 1).
+  The condition $\beta S(t) > \gamma$ is the pointwise growth criterion;
+  equivalently, $\beta S(t) / \gamma > 1$ (the effective reproduction
+  condition at time $t$).
 \<close>
 
 theorem epidemic_growth_iff:

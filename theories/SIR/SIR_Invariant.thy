@@ -1,11 +1,13 @@
 (*
-  SIR_Invariant.thy — Invariant region for the SIR system.
+  SIR_Invariant.thy — Boundedness of the SIR system.
 
-  Given conservation and nonnegativity (assumed in the locale), the
-  trajectory is confined to the simplex
-    {(S, I, R) | 0 ≤ S ∧ 0 ≤ I ∧ 0 ≤ R ∧ S + I + R = N}
-  which is bounded (hence no blow-up). This establishes that the
-  solution remains in a compact invariant region.
+  Given conservation and nonnegativity (assumed in the locale), all
+  compartments are bounded by the total population N.
+  This establishes that each compartment satisfies 0 ≤ X(t) ≤ N
+  on the interval [a, b].
+
+  Note: Nonnegativity is a locale assumption for the full trajectory.
+  This is NOT a forward-invariance proof from initial conditions.
 
   License: BSD-3-Clause
 *)
@@ -17,18 +19,18 @@ begin
 context SIR_solution
 begin
 
-section \<open>Invariant Region and Boundedness\<close>
+section \<open>Boundedness of Compartments\<close>
 
 text \<open>
-  The trajectory of the SIR system is confined to the simplex
+  Given conservation and the nonnegativity assumptions (locale hypotheses),
+  each compartment is bounded by the total population:
   \[
-    \Delta_N = \{(S, I, R) \in \mathbb{R}^3 \mid S \ge 0,\; I \ge 0,\;
-                 R \ge 0,\; S + I + R = N\}
+    0 \le X(t) \le N \quad \text{for } X \in \{S, I, R\}
   \]
-  where $N = S(a) + I(a) + R(a)$ is the total population.
-  This follows immediately from conservation and the nonnegativity
-  assumptions. The simplex is a closed bounded subset of $\mathbb{R}^3$,
-  so solutions cannot blow up in finite time.
+  where $N = S(a) + I(a) + R(a)$.
+
+  Note: nonnegativity is assumed for the full trajectory; this is
+  \emph{not} a forward-invariance result from initial conditions.
 \<close>
 
 theorem S_bounded:

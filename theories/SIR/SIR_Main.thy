@@ -55,10 +55,11 @@ text \<open>
   solutions are deferred to future work using the AFP ODE infrastructure.
 
   Additionally, we prove that the assumed nonnegativity together with
-  conservation confines the trajectory to the simplex
-  $\{(S,I,R) \mid S,I,R \ge 0,\; S+I+R=N\}$, establishing individual
-  upper bounds on all compartments
+  conservation yields upper bounds on all compartments: each is bounded
+  by the total population $N$
   (@{thm [source] SIR_solution.simplex_invariant}).
+  Note that nonnegativity is a locale assumption for the full trajectory,
+  not a forward-invariance result from initial conditions.
 \<close>
 
 end
