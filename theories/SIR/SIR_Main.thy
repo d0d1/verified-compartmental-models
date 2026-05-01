@@ -35,7 +35,7 @@ text \<open>
     \item \textbf{Monotonicity of R} (@{thm [source] SIR_solution.R_nondecreasing}):
       $R$ is nondecreasing on $[a,b]$.
 
-    \item \textbf{Epidemic threshold} (@{thm [source] SIR_solution.epidemic_growth_iff}):
+    \item \textbf{Epidemic growth condition} (@{thm [source] SIR_solution.epidemic_growth_iff}):
       $dI/dt > 0$ iff $I > 0$ and $\beta S > \gamma$.
 
     \item \textbf{Stationary infection condition} (@{thm [source] SIR_solution.peak_iff}):
@@ -57,7 +57,7 @@ text \<open>
   Additionally, we prove that the assumed nonnegativity together with
   conservation yields upper bounds on all compartments: each is bounded
   by the total population $N$
-  (@{thm [source] SIR_solution.simplex_invariant}).
+  (@{thm [source] SIR_solution.compartment_bounds}).
   Note that nonnegativity is a locale assumption for the full trajectory,
   not a forward-invariance result from initial conditions.
 \<close>

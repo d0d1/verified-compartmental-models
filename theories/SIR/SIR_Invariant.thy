@@ -83,10 +83,10 @@ lemma total_population_nonneg: "0 \<le> total_population"
   by linarith
 
 text \<open>
-  Combined simplex invariant: all compartments are nonneg and sum to $N$.
+  Combined boundedness: all compartments are nonneg (assumed) and bounded by $N$.
 \<close>
 
-corollary simplex_invariant:
+corollary compartment_bounds:
   assumes "t \<in> {a..b}"
   shows "0 \<le> S t" and "S t \<le> total_population"
     and "0 \<le> I t" and "I t \<le> total_population"

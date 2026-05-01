@@ -62,8 +62,8 @@ next
 qed
 
 text \<open>
-  The threshold condition at the initial time determines whether an epidemic
-  occurs (I initially increasing).
+  The growth condition at the initial time determines whether infections
+  are initially increasing.
 \<close>
 
 corollary initial_epidemic_growth:
