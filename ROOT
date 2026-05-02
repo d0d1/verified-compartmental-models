@@ -19,18 +19,16 @@ session VCM_Base = Ordinary_Differential_Equations +
     SIR_Phase_Plane
     SIR_Invariant
 
-session Verified_Compartmental_Models = VCM_Base +
+session Verified_Compartmental_Models in work = VCM_Base +
   description \<open>
     Active development session: existence/uniqueness proofs and main entry point.
     Extends VCM_Base with SIR_Existence (Picard-Lindelöf) and SIR_Main.
     Iterative builds should be fast after VCM_Base is cached.
   \<close>
   options [timeout = 7200, document = false, quick_and_dirty]
-  directories
-    "theories/SIR"
   theories
     SIR_Existence
     SIR_Main
-  document_files
+  document_files (in "../document")
     "root.tex"
     "root.bib"

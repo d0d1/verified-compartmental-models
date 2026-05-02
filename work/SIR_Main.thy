@@ -9,13 +9,13 @@
 
 theory SIR_Main
   imports
-    SIR_Forward_Invariance
-    SIR_Conservation
-    SIR_Monotonicity
-    SIR_Threshold
-    SIR_Peak
-    SIR_Phase_Plane
-    SIR_Invariant
+    "VCM_Base.SIR_Forward_Invariance"
+    "VCM_Base.SIR_Conservation"
+    "VCM_Base.SIR_Monotonicity"
+    "VCM_Base.SIR_Threshold"
+    "VCM_Base.SIR_Peak"
+    "VCM_Base.SIR_Phase_Plane"
+    "VCM_Base.SIR_Invariant"
     SIR_Existence
 begin
 

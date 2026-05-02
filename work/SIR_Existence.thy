@@ -14,7 +14,7 @@
 
 theory SIR_Existence
   imports
-    SIR_Defs
+    "VCM_Base.SIR_Defs"
     "Ordinary_Differential_Equations.ODE_Analysis"
 begin
 
@@ -70,7 +70,14 @@ proof -
   have d_prod: "((\<lambda>y. y$1 * y$2) has_derivative (\<lambda>h. x$1 * h$2 + h$1 * x$2)) (at x)"
     by (rule bounded_bilinear.FDERIV[OF bounded_bilinear_mult d_nth1 d_nth2])
   have d_comp1: "((\<lambda>y. - \<beta> * (y$1 * y$2)) has_derivative (\<lambda>h. - \<beta> * (x$1 * h$2 + h$1 * x$2))) (at x)"
-    by (rule has_derivative_mult_left[OF d_prod, of "- \<beta>"])
+  proof -
+    have d_const: "((\<lambda>y :: real^3. - \<beta>) has_derivative (\<lambda>h. 0)) (at x)"
+      by (rule derivative_intros)
+    have "((\<lambda>y. (- \<beta>) * (y$1 * y$2)) has_derivative
+          (\<lambda>h. (- \<beta>) * (x$1 * h$2 + h$1 * x$2) + 0 * (x$1 * x$2))) (at x)"
+      by (rule has_derivative_mult[OF d_const d_prod])
+    then show ?thesis by simp
+  qed
   have d_comp2: "((\<lambda>y. \<beta> * (y$1 * y$2) - \<gamma> * y$2) has_derivative
                   (\<lambda>h. \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2)) (at x)"
     by (intro derivative_eq_intros d_prod d_nth2) auto
@@ -124,6 +131,14 @@ lemma continuous_on_scale_component [continuous_intros]:
   "continuous_on s (\<lambda>x :: real^('n::finite). c * x $ i)"
   by (rule continuous_on_mult_left) (rule vec_nth_continuous_on)
 
+lemma continuous_on_neg_scale_component [continuous_intros]:
+  "continuous_on s (\<lambda>x :: real^('n::finite). -(c * x $ i))"
+  by (intro continuous_intros)
+
+lemma continuous_on_scale_component_diff_const [continuous_intros]:
+  "continuous_on s (\<lambda>x :: real^('n::finite). c * x $ i - d)"
+  by (intro continuous_intros)
+
 lemma continuous_on_sir_vf_deriv:
   "continuous_on UNIV (sir_vf_deriv \<beta> \<gamma>)"
   unfolding sir_vf_deriv_def
@@ -137,8 +152,7 @@ proof (intro continuous_on_blinfun_of_matrix)
         else if i = axis 2 1 \<and> j = axis 2 1 then \<beta> * x $ 1 - \<gamma>
         else if i = axis 3 1 \<and> j = axis 2 1 then \<gamma> else 0)"
     unfolding ab using exhaust_3[of a] exhaust_3[of b]
-    by (auto simp: axis_eq_axis
-             intro: continuous_intros continuous_on_mult_left continuous_on_mult_right)
+    by (auto intro: continuous_intros)
 qed
 
 text \<open>
