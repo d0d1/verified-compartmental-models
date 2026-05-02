@@ -20,23 +20,20 @@ begin
 
 ML_command \<open>
   val vcm_checkpoint_path = Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log"
-  fun vcm_checkpoint msg =
-    let val line = msg ^ "\n"
-    in File.append vcm_checkpoint_path line; Output.physical_stderr line end
   val _ = File.write vcm_checkpoint_path ""
-  val _ = vcm_checkpoint "VCM_CHECKPOINT: SIR_Existence begin"
+  val _ = File.append vcm_checkpoint_path "VCM_CHECKPOINT: SIR_Existence begin\n"
 \<close>
 
 section \<open>SIR Vector Field Definition\<close>
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: section vector field reached"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: section vector field reached\n"\<close>
 
 text \<open>
   We define the SIR system as an autonomous vector ODE on @{typ "real^3"}.
   Components: $1 = S$, $2 = I$, $3 = R$.
 \<close>
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: vector field intro text complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: vector field intro text complete\n"\<close>
 
 definition sir_vf :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarrow> (real^3)" where
   "sir_vf \<beta> \<gamma> x = (\<chi> i.
@@ -44,7 +41,7 @@ definition sir_vf :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarro
      else if i = 2 then \<beta> * (x$1) * (x$2) - \<gamma> * (x$2)
      else \<gamma> * (x$2))"
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: sir_vf definition complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: sir_vf definition complete\n"\<close>
 
 lemma sir_vf_components:
   "(sir_vf \<beta> \<gamma> x)$1 = - \<beta> * (x$1) * (x$2)"
@@ -52,13 +49,13 @@ lemma sir_vf_components:
   "(sir_vf \<beta> \<gamma> x)$3 = \<gamma> * (x$2)"
   unfolding sir_vf_def by simp_all
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: sir_vf_components complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: sir_vf_components complete\n"\<close>
 
 lemma sir_vf_sum_zero:
   "(sir_vf \<beta> \<gamma> x)$1 + (sir_vf \<beta> \<gamma> x)$2 + (sir_vf \<beta> \<gamma> x)$3 = 0"
   unfolding sir_vf_components by simp
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: vector field definitions complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: vector field definitions complete\n"\<close>
 
 section \<open>Continuous Differentiability\<close>
 
@@ -178,7 +175,7 @@ next
     by (rule continuous_on_sir_vf_deriv)
 qed
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: c1_on_open interpretation complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: c1_on_open interpretation complete\n"\<close>
 
 section \<open>Local Existence and Uniqueness\<close>
 
@@ -269,7 +266,7 @@ proof -
             sir_is_interval_existence_ivl iv assms(1)]) simp
 qed
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: local existence and uniqueness complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: local existence and uniqueness complete\n"\<close>
 
 section \<open>Conservation Along the Flow\<close>
 
@@ -326,7 +323,7 @@ proof -
   then show ?thesis using gc[OF assms] unfolding g_def by simp
 qed
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: conservation along flow complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: conservation along flow complete\n"\<close>
 
 section \<open>Forward Invariance of the Nonnegative Orthant\<close>
 
@@ -473,7 +470,7 @@ next
     by auto
 qed
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: forward invariance complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: forward invariance complete\n"\<close>
 
 section \<open>Global Forward Existence\<close>
 
@@ -555,7 +552,7 @@ next
   show "0 \<le> t" by fact
 qed
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: global forward existence complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: global forward existence complete\n"\<close>
 
 section \<open>Bridge to Scalar SIR Locale\<close>
 
@@ -747,6 +744,6 @@ qed
 
 end
 
-ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: SIR_ODE locale complete"\<close>
+ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: SIR_ODE locale complete\n"\<close>
 
 end
