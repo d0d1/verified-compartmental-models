@@ -29,10 +29,14 @@ ML_command \<open>
 
 section \<open>SIR Vector Field Definition\<close>
 
+ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: section vector field reached"\<close>
+
 text \<open>
   We define the SIR system as an autonomous vector ODE on @{typ "real^3"}.
   Components: $1 = S$, $2 = I$, $3 = R$.
 \<close>
+
+ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: vector field intro text complete"\<close>
 
 definition sir_vf :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarrow> (real^3)" where
   "sir_vf \<beta> \<gamma> x = (\<chi> i.
@@ -40,11 +44,15 @@ definition sir_vf :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarro
      else if i = 2 then \<beta> * (x$1) * (x$2) - \<gamma> * (x$2)
      else \<gamma> * (x$2))"
 
+ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: sir_vf definition complete"\<close>
+
 lemma sir_vf_components:
   "(sir_vf \<beta> \<gamma> x)$1 = - \<beta> * (x$1) * (x$2)"
   "(sir_vf \<beta> \<gamma> x)$2 = \<beta> * (x$1) * (x$2) - \<gamma> * (x$2)"
   "(sir_vf \<beta> \<gamma> x)$3 = \<gamma> * (x$2)"
   unfolding sir_vf_def by simp_all
+
+ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: sir_vf_components complete"\<close>
 
 lemma sir_vf_sum_zero:
   "(sir_vf \<beta> \<gamma> x)$1 + (sir_vf \<beta> \<gamma> x)$2 + (sir_vf \<beta> \<gamma> x)$3 = 0"
