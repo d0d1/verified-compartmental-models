@@ -1,16 +1,35 @@
-session Verified_Compartmental_Models = Ordinary_Differential_Equations +
+session VCM_Base = Ordinary_Differential_Equations +
   description \<open>
-    A reusable Isabelle/HOL framework for certified reasoning about
-    compartmental ODE models, instantiated on the classical SIR epidemic model.
-    Proves existence, uniqueness, forward invariance, conservation, monotonicity,
-    epidemic threshold, and simplex invariance via the AFP Picard-Lindelöf
-    infrastructure.
+    Stable base theories for verified compartmental models.
+    Includes the reusable framework, SIR locale definitions, and all
+    proven properties (forward invariance, conservation, monotonicity,
+    threshold, peak, phase plane, simplex invariance).
+    Build once with -b and cache as a heap image.
   \<close>
-  options [timeout = 7200, document = false, quick_and_dirty]
+  options [timeout = 14400, document = false]
   directories
     "theories/Framework"
     "theories/SIR"
   theories
+    SIR_Forward_Invariance
+    SIR_Conservation
+    SIR_Monotonicity
+    SIR_Threshold
+    SIR_Peak
+    SIR_Phase_Plane
+    SIR_Invariant
+
+session Verified_Compartmental_Models = VCM_Base +
+  description \<open>
+    Active development session: existence/uniqueness proofs and main entry point.
+    Extends VCM_Base with SIR_Existence (Picard-Lindelöf) and SIR_Main.
+    Iterative builds should be fast after VCM_Base is cached.
+  \<close>
+  options [timeout = 7200, document = false, quick_and_dirty]
+  directories
+    "theories/SIR"
+  theories
+    SIR_Existence
     SIR_Main
   document_files
     "root.tex"

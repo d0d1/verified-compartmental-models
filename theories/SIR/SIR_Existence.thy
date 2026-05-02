@@ -70,7 +70,7 @@ proof -
   have d_prod: "((\<lambda>y. y$1 * y$2) has_derivative (\<lambda>h. x$1 * h$2 + h$1 * x$2)) (at x)"
     by (rule bounded_bilinear.FDERIV[OF bounded_bilinear_mult d_nth1 d_nth2])
   have d_comp1: "((\<lambda>y. - \<beta> * (y$1 * y$2)) has_derivative (\<lambda>h. - \<beta> * (x$1 * h$2 + h$1 * x$2))) (at x)"
-    by (intro derivative_eq_intros d_prod) auto
+    by (rule has_derivative_mult_left[OF d_prod, of "- \<beta>"])
   have d_comp2: "((\<lambda>y. \<beta> * (y$1 * y$2) - \<gamma> * y$2) has_derivative
                   (\<lambda>h. \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2)) (at x)"
     by (intro derivative_eq_intros d_prod d_nth2) auto
@@ -114,6 +114,16 @@ proof -
   ultimately show ?thesis by simp
 qed
 
+text \<open>Projection @{term "(\<lambda>x. x $ i)"} is bounded linear, hence continuous on any set.\<close>
+
+lemma vec_nth_continuous_on [continuous_intros]:
+  "continuous_on s (\<lambda>x :: real^('n::finite). x $ i)"
+  using continuous_on_component[OF continuous_on_id] .
+
+lemma continuous_on_scale_component [continuous_intros]:
+  "continuous_on s (\<lambda>x :: real^('n::finite). c * x $ i)"
+  by (rule continuous_on_mult_left) (rule vec_nth_continuous_on)
+
 lemma continuous_on_sir_vf_deriv:
   "continuous_on UNIV (sir_vf_deriv \<beta> \<gamma>)"
   unfolding sir_vf_deriv_def
@@ -126,9 +136,9 @@ proof (intro continuous_on_blinfun_of_matrix)
         else if i = axis 2 1 \<and> j = axis 1 1 then \<beta> * x $ 2
         else if i = axis 2 1 \<and> j = axis 2 1 then \<beta> * x $ 1 - \<gamma>
         else if i = axis 3 1 \<and> j = axis 2 1 then \<gamma> else 0)"
-    unfolding ab
-    by (cases a rule: exhaust_3; cases b rule: exhaust_3;
-        simp add: axis_eq_axis; intro continuous_intros)
+    unfolding ab using exhaust_3[of a] exhaust_3[of b]
+    by (auto simp: axis_eq_axis
+             intro: continuous_intros continuous_on_mult_left continuous_on_mult_right)
 qed
 
 text \<open>
@@ -337,8 +347,7 @@ proof -
   have seg: "{0..t} \<subseteq> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
     by (rule sir_ivl_subset[OF assms])
   show ?thesis
-    by (intro continuous_on_subset[OF _ seg]
-         continuous_on_compose2[OF continuous_on_vec_nth sir_flow_continuous_on subset_refl])
+    by (rule continuous_on_subset[OF continuous_on_component[OF sir_flow_continuous_on] seg])
 qed
 
 lemma sir_flow_nonneg_S:
