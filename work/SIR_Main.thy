@@ -19,7 +19,7 @@ theory SIR_Main
     SIR_Existence
 begin
 
-ML_command \<open>Output.physical_stderr "VCM_CHECKPOINT: SIR_Main begin\n"\<close>
+ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: SIR_Main begin"\<close>
 
 section \<open>Summary of Results\<close>
 
@@ -91,6 +91,6 @@ text \<open>
   unconditional consequences of the initial-value problem.
 \<close>
 
-ML_command \<open>Output.physical_stderr "VCM_CHECKPOINT: SIR_Main summary complete\n"\<close>
+ML_command \<open>vcm_checkpoint "VCM_CHECKPOINT: SIR_Main summary complete"\<close>
 
 end
