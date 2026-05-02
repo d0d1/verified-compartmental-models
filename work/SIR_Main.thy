@@ -19,6 +19,8 @@ theory SIR_Main
     SIR_Existence
 begin
 
+ML_command \<open>Output.physical_stderr "VCM_CHECKPOINT: SIR_Main begin\n"\<close>
+
 section \<open>Summary of Results\<close>
 
 text \<open>
@@ -88,5 +90,7 @@ text \<open>
   interprets @{locale SIR_solution}, making all the above results
   unconditional consequences of the initial-value problem.
 \<close>
+
+ML_command \<open>Output.physical_stderr "VCM_CHECKPOINT: SIR_Main summary complete\n"\<close>
 
 end
