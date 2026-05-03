@@ -21,14 +21,17 @@ classical SIR (Susceptible--Infectious--Recovered) epidemic model.
 The framework's central result is a generic forward invariance theorem for
 linear ODEs: any equation $X' = f(t) \cdot X$ with continuous $f$ preserves
 the sign of initial conditions, proved via the integrating factor method
-without requiring Picard--Lindel\"of existence/uniqueness.
+independently of Picard--Lindel\"of existence/uniqueness.
 
-The SIR instantiation proves: forward invariance of the nonnegative orthant
-from initial conditions alone; explicit solution formulas; conservation of
-total population; monotonicity of $S$ and $R$; the Kermack--McKendrick
-phase-plane invariant ($I + S - (\gamma/\beta)\ln S = \text{const}$,
-assuming $S(a)>0$); the basic reproduction number $R_0 = \beta S(a)/\gamma$ with
-threshold conditions; $I$ is nonincreasing when $R_0 \le 1$; and boundedness.
+The SIR instantiation proves Picard--Lindel\"of existence and uniqueness for
+the SIR vector field, global forward existence for nonnegative initial data,
+and a bridge from the unique flow to the scalar SIR locale.  The resulting
+unique solution satisfies forward invariance of the nonnegative orthant,
+conservation of total population, monotonicity of $S$ and $R$, the
+Kermack--McKendrick phase-plane invariant
+($I + S - (\gamma/\beta)\ln S = \text{const}$, assuming $S(a)>0$), the basic
+reproduction number $R_0 = \beta S(a)/\gamma$ with threshold conditions,
+$I$ is nonincreasing when $R_0 \le 1$, and boundedness.
 
 All results are fully proved with zero \texttt{sorry}/\texttt{admit}/\texttt{oops}.
 \end{abstract}
@@ -50,14 +53,16 @@ with the SIR model as its first instantiation.
 \begin{itemize}
 \item A generic linear ODE solution theorem via the integrating factor,
       yielding scalar sign preservation for arbitrary continuous coefficients.
-\item Forward invariance: nonneg initial conditions imply nonneg trajectories,
-      proved without Picard--Lindel\"of.
+\item Forward invariance: nonneg initial conditions imply nonneg trajectories.
 \item A generic three-compartment conservation theorem.
 \item Monotonicity corollaries for compartments with signed derivatives.
 \item A locale-based SIR formalization proving forward invariance, explicit
       solutions, conservation, monotonicity, the Kermack--McKendrick invariant,
       the basic reproduction number $R_0$ with global epidemic-decline theorem,
       and the stationary infection condition.
+\item A Picard--Lindel\"of-backed SIR flow construction proving global forward
+      existence for nonnegative initial data and applying the scalar theorems
+      to the unique ODE solution.
 \end{itemize}
 
 % generated text of all theories

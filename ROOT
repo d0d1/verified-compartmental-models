@@ -25,7 +25,7 @@ session Verified_Compartmental_Models in work = VCM_Base +
     Extends VCM_Base with SIR_Existence (Picard-Lindelöf) and SIR_Main.
     Iterative builds should be fast after VCM_Base is cached.
   \<close>
-  options [timeout = 7200, document = false, quick_and_dirty]
+  options [timeout = 7200, document = false]
   theories
     SIR_Existence
     SIR_Main

@@ -13,10 +13,9 @@ AFP-style and JFR-style papers.
 1. **Audit**: Every paper claim maps to an actual Isabelle theorem name.
 2. **Honesty**: No unsupported or overclaimed results anywhere.
 3. **Forward invariance**: Prove nonnegative orthant forward invariance from
-   nonnegative initial conditions, OR explicitly/consistently narrow every
-   claim to already-given differentiable trajectories.
-4. **Existence/uniqueness**: Prove existence/uniqueness for SIR ODE, OR
-   explicitly and consistently narrow every claim.
+   nonnegative initial conditions.
+4. **Existence/uniqueness**: Prove Picard--Lindelöf existence/uniqueness and
+   global forward existence for the SIR ODE.
 5. **Reusable framework**: Genuinely reusable framework lemmas that the SIR
    instance actually uses (not just 3-function conservation).
 6. **Serious SIR development**: Strengthen beyond algebraic consequences —
@@ -25,7 +24,8 @@ AFP-style and JFR-style papers.
 8. **Theorem inventory**: Exact mapping of theorems to paper claims, with
    true readiness status.
 9. **Papers**: AFP-style and JFR-style papers aligned with actual formalization.
-10. **Build clean**: `isabelle build -c -D .` passes with no errors.
+10. **Build clean**: `isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models`
+    passes with no errors.
 
 ### DO NOT:
 - Mark project as complete, publication-ready, or meeting scope unless ALL above hold.
@@ -46,5 +46,7 @@ This repo contains the Isabelle/HOL formalization:
 
 ## Build
 
-Use `isabelle build -d . Verified_Compartmental_Models` only when HOL-Analysis
-heap is pre-built. Prefer `../../shared/bin/build-all.sh` from the parent project.
+Use `isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models`
+when AFP is not registered as an Isabelle component. Prefer
+`../../shared/bin/build-all.sh` from the parent project when using the shared
+tooling.
