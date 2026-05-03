@@ -1,11 +1,11 @@
 (*
-  SIR_Threshold.thy — Epidemic growth condition and basic reproduction number.
+  SIR_Threshold.thy — Epidemic growth condition and threshold ratios.
 
   The infected compartment I has positive derivative if and only if
   I > 0 and beta * S > gamma. This is the pointwise growth criterion.
 
-  We also define the effective reproduction number R_e(t) = β·S(t)/γ
-  and the basic reproduction number R₀ = β·S(a)/γ at the start.
+  We also define the effective threshold ratio R_e(t) = β·S(t)/γ
+  and its initial value R_zero = β·S(a)/γ.
 
   License: BSD-3-Clause
 *)
@@ -60,11 +60,11 @@ next
   finally show "\<beta> * S t * I t - \<gamma> * I t > 0" .
 qed
 
-section \<open>Basic Reproduction Number\<close>
+section \<open>Effective Threshold Ratio\<close>
 
 text \<open>
-  The effective reproduction number at time $t$ is $R_e(t) = \beta S(t) / \gamma$.
-  The basic reproduction number $R_0 = \beta S(a) / \gamma$ is its initial value.
+  The effective threshold ratio at time $t$ is $R_e(t) = \beta S(t) / \gamma$.
+  The quantity $R_zero = \beta S(a) / \gamma$ is its initial value.
   Epidemic growth at time $t$ requires $R_e(t) > 1$ (i.e., $\beta S(t) > \gamma$).
 \<close>
 
@@ -137,12 +137,13 @@ proof -
   finally show ?thesis .
 qed
 
-section \<open>Global Monotonicity of I under $R_0 \le 1$\<close>
+section \<open>Global Monotonicity of I under $R_zero \le 1$\<close>
 
 text \<open>
-  If $R_0 \le 1$, then $\beta S(t) \le \gamma$ for all $t \in [a,b]$
-  (since $S$ is nonincreasing), so $I'(t) = I(t)(\beta S(t) - \gamma) \le 0$
-  and $I$ is nonincreasing on the entire interval.
+  If the initial threshold ratio $R_zero$ is at most 1, then
+  $\beta S(t) \le \gamma$ for all $t \in [a,b]$ (since $S$ is
+  nonincreasing), so $I'(t) = I(t)(\beta S(t) - \gamma) \le 0$ and $I$
+  is nonincreasing on the entire interval.
 \<close>
 
 lemma R_eff_nonincreasing:
