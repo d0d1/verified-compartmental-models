@@ -62,7 +62,8 @@ Requires **Isabelle 2024** and **AFP 2024** with the
 isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models
 ```
 
-Build time: ~12 seconds on a modern machine.
+Build time depends on hardware and cache state; recent validations complete in
+tens of seconds on a small Linux VM.
 
 ## Assumptions and Scope
 
