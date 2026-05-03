@@ -19,7 +19,6 @@ theory SIR_Main
     SIR_Existence
 begin
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: SIR_Main begin\n"\<close>
 
 section \<open>Summary of Results\<close>
 
@@ -91,6 +90,5 @@ text \<open>
   unconditional consequences of the initial-value problem.
 \<close>
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: SIR_Main summary complete\n"\<close>
 
 end

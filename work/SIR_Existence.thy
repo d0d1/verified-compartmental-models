@@ -18,22 +18,12 @@ theory SIR_Existence
     "Ordinary_Differential_Equations.ODE_Analysis"
 begin
 
-ML_command \<open>
-  val vcm_checkpoint_path = Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log"
-  val _ = File.write vcm_checkpoint_path ""
-  val _ = File.append vcm_checkpoint_path "VCM_CHECKPOINT: SIR_Existence begin\n"
-\<close>
-
 section \<open>SIR Vector Field Definition\<close>
-
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: section vector field reached\n"\<close>
 
 text \<open>
   We define the SIR system as an autonomous vector ODE on @{typ "real^3"}.
   Components: $1 = S$, $2 = I$, $3 = R$.
 \<close>
-
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: vector field intro text complete\n"\<close>
 
 definition sir_vf :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarrow> (real^3)" where
   "sir_vf \<beta> \<gamma> x = (\<chi> i.
@@ -41,7 +31,6 @@ definition sir_vf :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarro
      else if i = 2 then \<beta> * (x$1) * (x$2) - \<gamma> * (x$2)
      else \<gamma> * (x$2))"
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: sir_vf definition complete\n"\<close>
 
 lemma sir_vf_components:
   "(sir_vf \<beta> \<gamma> x)$1 = - \<beta> * (x$1) * (x$2)"
@@ -49,13 +38,15 @@ lemma sir_vf_components:
   "(sir_vf \<beta> \<gamma> x)$3 = \<gamma> * (x$2)"
   unfolding sir_vf_def by simp_all
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: sir_vf_components complete\n"\<close>
 
 lemma sir_vf_sum_zero:
   "(sir_vf \<beta> \<gamma> x)$1 + (sir_vf \<beta> \<gamma> x)$2 + (sir_vf \<beta> \<gamma> x)$3 = 0"
   unfolding sir_vf_components by simp
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: vector field definitions complete\n"\<close>
+lemma bounded_linear_sir_total:
+  "bounded_linear (\<lambda>x :: real^3. x$1 + x$2 + x$3)"
+  by (intro bounded_linear_add bounded_linear_vec_nth)
+
 
 section \<open>Continuous Differentiability\<close>
 
@@ -64,71 +55,182 @@ text \<open>
   We compute the Jacobian explicitly and prove differentiability.
 \<close>
 
+definition sir_vf_deriv_fun :: "real \<Rightarrow> real \<Rightarrow> real^3 \<Rightarrow> real^3 \<Rightarrow> real^3" where
+  "sir_vf_deriv_fun \<beta> \<gamma> x h = (\<chi> i.
+      if i = 1 then - \<beta> * (x$1 * h$2 + h$1 * x$2)
+      else if i = 2 then \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2
+      else \<gamma> * h$2)"
+
+lemma bounded_linear_sir_vf_deriv_fun:
+  "bounded_linear (sir_vf_deriv_fun \<beta> \<gamma> x)"
+proof -
+  have "bounded_linear (\<lambda>h. sir_vf_deriv_fun \<beta> \<gamma> x h \<bullet> b)" if "b \<in> Basis" for b
+  proof -
+    from that obtain i :: 3 where b: "b = axis i 1"
+      by (auto simp: Basis_vec_def)
+    show ?thesis
+      unfolding b sir_vf_deriv_fun_def
+      by (cases "i = 1"; cases "i = 2";
+          simp add: inner_axis algebra_simps;
+          intro bounded_linear_add bounded_linear_sub bounded_linear_minus
+            bounded_linear_const_mult bounded_linear_mult_const bounded_linear_vec_nth)
+  qed
+  then show ?thesis
+    by (subst bounded_linear_componentwise_iff) auto
+qed
+
 definition sir_vf_deriv :: "real \<Rightarrow> real \<Rightarrow> (real^3) \<Rightarrow> (real^3) \<Rightarrow>\<^sub>L (real^3)" where
-  "sir_vf_deriv \<beta> \<gamma> x = blinfun_of_matrix (\<lambda> i j.
-     if i = axis 1 1 \<and> j = axis 1 1 then - \<beta> * (x$2)
-     else if i = axis 1 1 \<and> j = axis 2 1 then - \<beta> * (x$1)
-     else if i = axis 2 1 \<and> j = axis 1 1 then \<beta> * (x$2)
-     else if i = axis 2 1 \<and> j = axis 2 1 then \<beta> * (x$1) - \<gamma>
-     else if i = axis 3 1 \<and> j = axis 2 1 then \<gamma>
-     else 0)"
+  "sir_vf_deriv \<beta> \<gamma> x = Blinfun (sir_vf_deriv_fun \<beta> \<gamma> x)"
+
+lemma sir_vf_nth1_has_derivative:
+  "((\<lambda>y :: real^3. y$1) has_derivative (\<lambda>h :: real^3. h$1)) (at x)"
+  using bounded_linear_imp_has_derivative[OF bounded_linear_vec_nth[where i="1::3"]]
+  by auto
+
+lemma sir_vf_nth2_has_derivative:
+  "((\<lambda>y :: real^3. y$2) has_derivative (\<lambda>h :: real^3. h$2)) (at x)"
+  using bounded_linear_imp_has_derivative[OF bounded_linear_vec_nth[where i="2::3"]]
+  by auto
+
+
+lemma sir_vf_prod_has_derivative:
+  "((\<lambda>y :: real^3. y$1 * y$2) has_derivative
+      (\<lambda>h :: real^3. x$1 * h$2 + h$1 * x$2)) (at x)"
+  by (rule bounded_bilinear.FDERIV[OF bounded_bilinear_mult
+        sir_vf_nth1_has_derivative sir_vf_nth2_has_derivative])
+
+
+lemma sir_vf_beta_prod_has_derivative:
+  "((\<lambda>y :: real^3. \<beta> * (y$1 * y$2)) has_derivative
+      (\<lambda>h :: real^3. \<beta> * (x$1 * h$2 + h$1 * x$2))) (at x)"
+proof -
+  have mult_beta: "((*) \<beta> has_derivative (*) \<beta>) (at (x$1 * x$2))"
+    by (intro derivative_intros)
+  show ?thesis
+    using has_derivative_compose[OF sir_vf_prod_has_derivative mult_beta]
+    by simp
+qed
+
+
+lemma sir_vf_neg_beta_prod_has_derivative:
+  "((\<lambda>y :: real^3. - \<beta> * (y$1 * y$2)) has_derivative
+      (\<lambda>h :: real^3. - \<beta> * (x$1 * h$2 + h$1 * x$2))) (at x)"
+proof -
+  have "((\<lambda>y :: real^3. - (\<beta> * (y$1 * y$2))) has_derivative
+      (\<lambda>h :: real^3. - (\<beta> * (x$1 * h$2 + h$1 * x$2)))) (at x)"
+    by (rule has_derivative_minus[OF sir_vf_beta_prod_has_derivative])
+  then show ?thesis by simp
+qed
+
+
+lemma sir_vf_gamma_y2_has_derivative:
+  "((\<lambda>y :: real^3. \<gamma> * y$2) has_derivative (\<lambda>h :: real^3. \<gamma> * h$2)) (at x)"
+proof -
+  have mult_gamma: "((*) \<gamma> has_derivative (*) \<gamma>) (at (x$2))"
+    by (intro derivative_intros)
+  show ?thesis
+    using has_derivative_compose[OF sir_vf_nth2_has_derivative mult_gamma]
+    by simp
+qed
+
+
+lemma sir_vf_comp2_has_derivative:
+  "((\<lambda>y :: real^3. \<beta> * (y$1 * y$2) - \<gamma> * y$2) has_derivative
+      (\<lambda>h :: real^3. \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2)) (at x)"
+  by (rule has_derivative_diff[OF sir_vf_beta_prod_has_derivative sir_vf_gamma_y2_has_derivative])
+
+
+lemma sir_vf_component1_has_derivative:
+  "((\<lambda>y :: real^3. (sir_vf \<beta> \<gamma> y)$1) has_derivative
+      (\<lambda>h :: real^3. (sir_vf_deriv_fun \<beta> \<gamma> x h)$1)) (at x)"
+proof -
+  have f_eq: "(\<lambda>y :: real^3. (sir_vf \<beta> \<gamma> y)$1) = (\<lambda>y. - \<beta> * (y$1 * y$2))"
+    by (simp add: fun_eq_iff sir_vf_components algebra_simps)
+  have d_eq: "(\<lambda>h :: real^3. (sir_vf_deriv_fun \<beta> \<gamma> x h)$1) =
+      (\<lambda>h. - \<beta> * (x$1 * h$2 + h$1 * x$2))"
+    by (simp add: fun_eq_iff sir_vf_deriv_fun_def)
+  show ?thesis
+    unfolding f_eq d_eq
+    by (rule sir_vf_neg_beta_prod_has_derivative)
+qed
+
+lemma sir_vf_component2_has_derivative:
+  "((\<lambda>y :: real^3. (sir_vf \<beta> \<gamma> y)$2) has_derivative
+      (\<lambda>h :: real^3. (sir_vf_deriv_fun \<beta> \<gamma> x h)$2)) (at x)"
+proof -
+  have f_eq: "(\<lambda>y :: real^3. (sir_vf \<beta> \<gamma> y)$2) =
+      (\<lambda>y. \<beta> * (y$1 * y$2) - \<gamma> * y$2)"
+    by (simp add: fun_eq_iff sir_vf_components algebra_simps)
+  have d_eq: "(\<lambda>h :: real^3. (sir_vf_deriv_fun \<beta> \<gamma> x h)$2) =
+      (\<lambda>h. \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2)"
+    by (simp add: fun_eq_iff sir_vf_deriv_fun_def)
+  show ?thesis
+    unfolding f_eq d_eq
+    by (rule sir_vf_comp2_has_derivative)
+qed
+
+lemma sir_vf_component3_has_derivative:
+  "((\<lambda>y :: real^3. (sir_vf \<beta> \<gamma> y)$3) has_derivative
+      (\<lambda>h :: real^3. (sir_vf_deriv_fun \<beta> \<gamma> x h)$3)) (at x)"
+proof -
+  have f_eq: "(\<lambda>y :: real^3. (sir_vf \<beta> \<gamma> y)$3) = (\<lambda>y. \<gamma> * y$2)"
+    by (simp add: fun_eq_iff sir_vf_components)
+  have d_eq: "(\<lambda>h :: real^3. (sir_vf_deriv_fun \<beta> \<gamma> x h)$3) = (\<lambda>h. \<gamma> * h$2)"
+    by (simp add: fun_eq_iff sir_vf_deriv_fun_def)
+  show ?thesis
+    unfolding f_eq d_eq
+    by (rule sir_vf_gamma_y2_has_derivative)
+qed
+
+
+lemma sir_vf_deriv_apply:
+  "blinfun_apply (sir_vf_deriv \<beta> \<gamma> x) h = sir_vf_deriv_fun \<beta> \<gamma> x h"
+  unfolding sir_vf_deriv_def
+  by (simp add: bounded_linear_Blinfun_apply bounded_linear_sir_vf_deriv_fun)
+
+
+lemma sir_vf_axis_has_derivative:
+  "((\<lambda>y :: real^3. sir_vf \<beta> \<gamma> y \<bullet> axis i 1) has_derivative
+      (\<lambda>h :: real^3. sir_vf_deriv_fun \<beta> \<gamma> x h \<bullet> axis i 1)) (at x)"
+proof (cases "i = 1")
+  case True
+  then show ?thesis
+    using sir_vf_component1_has_derivative by (simp add: inner_axis)
+next
+  case False
+  show ?thesis
+  proof (cases "i = 2")
+    case True
+    then show ?thesis
+      using sir_vf_component2_has_derivative by (simp add: inner_axis)
+  next
+    case False2: False
+    then have "i = 3" using False exhaust_3[of i] by auto
+    then show ?thesis
+      using sir_vf_component3_has_derivative by (simp add: inner_axis)
+  qed
+qed
+
+
+lemma sir_vf_has_derivative_fun:
+  "(sir_vf \<beta> \<gamma> has_derivative sir_vf_deriv_fun \<beta> \<gamma> x) (at x)"
+proof -
+  have "(sir_vf \<beta> \<gamma> has_derivative sir_vf_deriv_fun \<beta> \<gamma> x) (at x within UNIV)"
+    by (subst has_derivative_componentwise_within)
+      (auto simp: Basis_vec_def intro: has_derivative_at_withinI sir_vf_axis_has_derivative)
+  then show ?thesis by simp
+qed
+
 
 lemma sir_vf_has_derivative:
   "(sir_vf \<beta> \<gamma> has_derivative blinfun_apply (sir_vf_deriv \<beta> \<gamma> x)) (at x)"
 proof -
-  \<comment> \<open>Step 1: Show that each component of sir\_vf has the expected derivative.\<close>
-  have d_nth1: "((\<lambda>y :: real^3. y$1) has_derivative (\<lambda>h :: real^3. h$1)) (at x)"
-    using bounded_linear_imp_has_derivative[OF bounded_linear_vec_nth[where i="1::3"]]
-    by auto
-  have d_nth2: "((\<lambda>y :: real^3. y$2) has_derivative (\<lambda>h :: real^3. h$2)) (at x)"
-    using bounded_linear_imp_has_derivative[OF bounded_linear_vec_nth[where i="2::3"]]
-    by auto
-  have d_prod: "((\<lambda>y. y$1 * y$2) has_derivative (\<lambda>h. x$1 * h$2 + h$1 * x$2)) (at x)"
-    by (rule bounded_bilinear.FDERIV[OF bounded_bilinear_mult d_nth1 d_nth2])
-  have d_comp1: "((\<lambda>y. - \<beta> * (y$1 * y$2)) has_derivative (\<lambda>h. - \<beta> * (x$1 * h$2 + h$1 * x$2))) (at x)"
-    sorry
-  have d_comp2: "((\<lambda>y. \<beta> * (y$1 * y$2) - \<gamma> * y$2) has_derivative
-                  (\<lambda>h. \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2)) (at x)"
-    by (intro derivative_eq_intros d_prod d_nth2) auto
-  have d_comp3: "((\<lambda>y. \<gamma> * y$2) has_derivative (\<lambda>h. \<gamma> * h$2)) (at x)"
-    by (intro derivative_eq_intros d_nth2) auto
-  \<comment> \<open>Step 2: Assemble into componentwise derivative of the vector function.\<close>
-  have "(sir_vf \<beta> \<gamma> has_derivative (\<lambda>h. \<chi> i.
-      if i = 1 then - \<beta> * (x$1 * h$2 + h$1 * x$2)
-      else if i = 2 then \<beta> * (x$1 * h$2 + h$1 * x$2) - \<gamma> * h$2
-      else \<gamma> * h$2)) (at x)"
-    (is "(_ has_derivative ?D) _")
-    unfolding has_derivative_componentwise_within[where S=UNIV, simplified]
-  proof
-    fix b :: "real^3" assume "b \<in> Basis"
-    then obtain i :: 3 where bi: "b = axis i 1" by (auto simp: Basis_vec_def)
-    show "((\<lambda>y. sir_vf \<beta> \<gamma> y \<bullet> b) has_derivative (\<lambda>h. ?D h \<bullet> b)) (at x)"
-      unfolding bi inner_axis sir_vf_def
-    proof (cases "i = 1")
-      case True then show ?thesis using d_comp1 by simp
-    next
-      case False
-      show ?thesis
-      proof (cases "i = 2")
-        case True then show ?thesis using d_comp2 by simp
-      next
-        case False
-        then have "i = 3" using \<open>i \<noteq> 1\<close> exhaust_3[of i] by auto
-        then show ?thesis using d_comp3 by simp
-      qed
-    qed
-  qed
-  \<comment> \<open>Step 3: Show this equals the blinfun application.\<close>
-  moreover have "?D = blinfun_apply (sir_vf_deriv \<beta> \<gamma> x)"
-  proof (rule ext)
-    fix h :: "real^3"
-    show "?D h = blinfun_apply (sir_vf_deriv \<beta> \<gamma> x) h"
-      unfolding sir_vf_deriv_def blinfun_of_matrix_apply
-      by (simp add: vec_eq_iff sum_3 inner_axis algebra_simps
-               forall_3 axis_eq_axis)
-  qed
-  ultimately show ?thesis by simp
+  have "blinfun_apply (sir_vf_deriv \<beta> \<gamma> x) = sir_vf_deriv_fun \<beta> \<gamma> x"
+    by (rule ext) (simp add: sir_vf_deriv_apply)
+  then show ?thesis
+    by (simp add: sir_vf_has_derivative_fun)
 qed
+
 
 text \<open>Projection @{term "(\<lambda>x. x $ i)"} is bounded linear, hence continuous on any set.\<close>
 
@@ -150,7 +252,41 @@ lemma continuous_on_scale_component_diff_const [continuous_intros]:
 
 lemma continuous_on_sir_vf_deriv:
   "continuous_on UNIV (sir_vf_deriv \<beta> \<gamma>)"
-  sorry
+proof (rule continuous_on_blinfun_componentwise[where f="sir_vf_deriv \<beta> \<gamma>" and s=UNIV])
+  fix h :: "real^3"
+  assume "h \<in> Basis"
+  have eq: "(\<lambda>x. blinfun_apply (sir_vf_deriv \<beta> \<gamma> x) h) =
+      (\<lambda>x. sir_vf_deriv_fun \<beta> \<gamma> x h)"
+    by (simp add: fun_eq_iff sir_vf_deriv_apply)
+  have "continuous_on UNIV (\<lambda>x. sir_vf_deriv_fun \<beta> \<gamma> x h)"
+    unfolding sir_vf_deriv_fun_def
+  proof (intro continuous_on_vec_lambda)
+    fix i :: 3
+    show "continuous_on UNIV
+      (\<lambda>x. if i = 1 then - \<beta> * (x $ 1 * h $ 2 + h $ 1 * x $ 2)
+            else if i = 2 then \<beta> * (x $ 1 * h $ 2 + h $ 1 * x $ 2) - \<gamma> * h $ 2
+            else \<gamma> * h $ 2)"
+    proof (cases "i = 1")
+      case True
+      then show ?thesis
+        by simp (intro continuous_intros)
+    next
+      case not1: False
+      show ?thesis
+      proof (cases "i = 2")
+        case True
+        then show ?thesis
+          by simp (intro continuous_intros)
+      next
+        case not2: False
+        then show ?thesis
+          using not1 by simp
+      qed
+    qed
+  qed
+  then show "continuous_on UNIV (\<lambda>x. blinfun_apply (sir_vf_deriv \<beta> \<gamma> x) h)"
+    by (subst eq)
+qed
 
 text \<open>
   Instantiate the @{locale c1_on_open} locale for the SIR vector field.
@@ -175,7 +311,6 @@ next
     by (rule continuous_on_sir_vf_deriv)
 qed
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: c1_on_open interpretation complete\n"\<close>
 
 section \<open>Local Existence and Uniqueness\<close>
 
@@ -206,8 +341,13 @@ lemma sir_flow_solves_ode:
   "(sir_c1.flow0 \<beta> \<gamma> x0 has_vderiv_on (\<lambda>t. sir_vf \<beta> \<gamma> (sir_c1.flow0 \<beta> \<gamma> x0 t)))
    (sir_c1.existence_ivl0 \<beta> \<gamma> x0)"
 proof -
-  have "x0 \<in> (UNIV :: (real^3) set)" by simp
-  then show ?thesis by (rule sir_c1.flow_has_vderiv_on)
+  have x0_in: "x0 \<in> (UNIV :: (real^3) set)" by simp
+  from sir_c1.flow_solves_ode[OF UNIV_I x0_in]
+  have "(sir_c1.flow0 \<beta> \<gamma> x0 solves_ode (\<lambda>_. sir_vf \<beta> \<gamma>))
+      (sir_c1.existence_ivl0 \<beta> \<gamma> x0) UNIV"
+    by simp
+  then show ?thesis
+    using solves_odeD by blast
 qed
 
 lemma sir_flow_solves_ode':
@@ -215,16 +355,13 @@ lemma sir_flow_solves_ode':
    (sir_c1.existence_ivl0 \<beta> \<gamma> x0) UNIV"
 proof -
   have "x0 \<in> (UNIV :: (real^3) set)" by simp
-  then show ?thesis by (rule sir_c1.flow_solves_ode)
+  from sir_c1.flow_solves_ode[OF UNIV_I this] show ?thesis by simp
 qed
 
 lemma sir_segment_subset:
   assumes "t \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
   shows "closed_segment 0 t \<subseteq> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
-proof -
-  have "x0 \<in> (UNIV :: (real^3) set)" by simp
-  then show ?thesis using assms by (rule sir_c1.closed_segment_subset_existence_ivl)
-qed
+  by (rule sir_c1.closed_segment_subset_existence_ivl[OF assms])
 
 lemma sir_ivl_subset:
   assumes "t \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0" "0 \<le> t"
@@ -239,10 +376,7 @@ lemma sir_ivl_mem:
 
 lemma sir_flow_continuous_on:
   "continuous_on (sir_c1.existence_ivl0 \<beta> \<gamma> x0) (sir_c1.flow0 \<beta> \<gamma> x0)"
-proof -
-  have "x0 \<in> (UNIV :: (real^3) set)" by simp
-  then show ?thesis by (rule sir_c1.flow_continuous_on)
-qed
+  by (rule vderiv_on_continuous_on[OF sir_flow_solves_ode])
 
 lemma sir_flow_initial:
   "sir_c1.flow0 \<beta> \<gamma> x0 0 = x0"
@@ -266,7 +400,6 @@ proof -
             sir_is_interval_existence_ivl iv assms(1)]) simp
 qed
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: local existence and uniqueness complete\n"\<close>
 
 section \<open>Conservation Along the Flow\<close>
 
@@ -281,49 +414,42 @@ lemma sir_flow_conservation:
          (sir_c1.flow0 \<beta> \<gamma> x0 t)$3 = x0$1 + x0$2 + x0$3"
 proof -
   let ?E = "sir_c1.existence_ivl0 \<beta> \<gamma> x0"
+  let ?seg = "closed_segment 0 t"
   let ?fl = "sir_c1.flow0 \<beta> \<gamma> x0"
-  define g where "g t = ?fl t $1 + ?fl t $2 + ?fl t $3" for t
-  have flow_ode: "(?fl has_vderiv_on (\<lambda>t. sir_vf \<beta> \<gamma> (?fl t))) ?E"
-    by (rule sir_flow_solves_ode)
-  have open_E: "open ?E" by simp
-  have "(g has_vderiv_on (\<lambda>t. 0)) ?E"
-    unfolding has_vderiv_on_def
-  proof
-    fix s assume "s \<in> ?E"
-    then have hvd: "(?fl has_vector_derivative sir_vf \<beta> \<gamma> (?fl s)) (at s)"
-      using flow_ode open_E
-      by (simp add: has_vderiv_on_def at_within_open)
-    have "(((\<lambda>v. v$1) \<circ> ?fl) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s))$1) (at s)"
-      using bounded_linear.has_vector_derivative[OF bounded_linear_vec_nth hvd] by (simp add: o_def)
-    then have d1: "((\<lambda>t. ?fl t $1) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s))$1) (at s)"
-      by (simp add: o_def)
-    have "(((\<lambda>v. v$2) \<circ> ?fl) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s))$2) (at s)"
-      using bounded_linear.has_vector_derivative[OF bounded_linear_vec_nth hvd] by (simp add: o_def)
-    then have d2: "((\<lambda>t. ?fl t $2) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s))$2) (at s)"
-      by (simp add: o_def)
-    have "(((\<lambda>v. v$3) \<circ> ?fl) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s))$3) (at s)"
-      using bounded_linear.has_vector_derivative[OF bounded_linear_vec_nth hvd] by (simp add: o_def)
-    then have d3: "((\<lambda>t. ?fl t $3) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s))$3) (at s)"
-      by (simp add: o_def)
-    have "(g has_vector_derivative
-        ((sir_vf \<beta> \<gamma> (?fl s))$1 + (sir_vf \<beta> \<gamma> (?fl s))$2 + (sir_vf \<beta> \<gamma> (?fl s))$3)) (at s)"
-      unfolding g_def using d1 d2 d3
-      by (intro has_vector_derivative_add; assumption)
-    then show "(g has_vector_derivative 0) (at s within ?E)"
-      by (simp add: sir_vf_sum_zero at_within_open[OF \<open>s \<in> ?E\<close> open_E])
+  let ?total = "\<lambda>x :: real^3. x$1 + x$2 + x$3"
+  let ?g = "\<lambda>s. ?total (?fl s)"
+  have seg_subset: "?seg \<subseteq> ?E"
+    by (rule sir_segment_subset[OF assms])
+  have const: "\<exists>c. \<forall>s\<in>?seg. ?g s = c"
+  proof (rule has_derivative_zero_constant)
+    show "convex ?seg"
+      by simp
+  next
+    fix s assume s_seg: "s \<in> ?seg"
+    then have s_E: "s \<in> ?E"
+      using seg_subset by auto
+    have flow_vd: "(?fl has_vderiv_on (\<lambda>s. sir_vf \<beta> \<gamma> (?fl s))) ?E"
+      by (rule sir_flow_solves_ode)
+    have hvd_E: "(?fl has_vector_derivative sir_vf \<beta> \<gamma> (?fl s)) (at s within ?E)"
+      using flow_vd s_E unfolding has_vderiv_on_def by blast
+    have hvd_seg: "(?fl has_vector_derivative sir_vf \<beta> \<gamma> (?fl s)) (at s within ?seg)"
+      using hvd_E seg_subset
+      by (auto simp: has_vector_derivative_def intro: has_derivative_subset)
+    have "(?g has_vector_derivative ?total (sir_vf \<beta> \<gamma> (?fl s))) (at s within ?seg)"
+      using bounded_linear.has_vector_derivative[OF bounded_linear_sir_total hvd_seg] .
+    then have "(?g has_vector_derivative 0) (at s within ?seg)"
+      by (simp add: sir_vf_sum_zero)
+    then show "(?g has_derivative (\<lambda>h. 0)) (at s within ?seg)"
+      by (simp add: has_vector_derivative_def)
   qed
-  moreover have "convex ?E"
-    by (intro is_interval_convex sir_c1.is_interval_existence_ivl)
-  ultimately obtain c where gc: "\<And>s. s \<in> ?E \<Longrightarrow> g s = c"
-    by (rule has_vderiv_on_zero_constant)
-  have "g 0 = c" by (rule gc) simp
-  also have "g 0 = x0$1 + x0$2 + x0$3"
-    unfolding g_def by simp
-  finally have "c = x0$1 + x0$2 + x0$3" ..
-  then show ?thesis using gc[OF assms] unfolding g_def by simp
+  then obtain c where c: "\<And>s. s \<in> ?seg \<Longrightarrow> ?g s = c"
+    by blast
+  have "?g t = ?g 0"
+    using c[of t] c[of 0] by simp
+  then show ?thesis
+    by (simp add: sir_flow_initial)
 qed
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: conservation along flow complete\n"\<close>
 
 section \<open>Forward Invariance of the Nonnegative Orthant\<close>
 
@@ -347,9 +473,11 @@ proof -
     by (rule sir_open_existence_ivl)
   have flow_vd: "(?fl has_vderiv_on (\<lambda>t. sir_vf \<beta> \<gamma> (?fl t))) (sir_c1.existence_ivl0 \<beta> \<gamma> x0)"
     by (rule sir_flow_solves_ode)
+  have hvd_within: "(?fl has_vector_derivative sir_vf \<beta> \<gamma> (?fl s))
+      (at s within sir_c1.existence_ivl0 \<beta> \<gamma> x0)"
+    using flow_vd assms unfolding has_vderiv_on_def by blast
   have hvd: "(?fl has_vector_derivative sir_vf \<beta> \<gamma> (?fl s)) (at s)"
-    using flow_vd
-    by (simp add: has_vderiv_on_def at_within_open[OF assms open_E])
+    using hvd_within by (simp add: at_within_open[OF assms open_E])
   have "((\<lambda>t. ?fl t $ i) has_vector_derivative (sir_vf \<beta> \<gamma> (?fl s)) $ i) (at s)"
     using bounded_linear.has_vector_derivative[OF bounded_linear_vec_nth hvd]
     by (simp add: o_def)
@@ -396,8 +524,14 @@ next
   have f_cont: "continuous_on {0..t} ?f"
     by (intro continuous_intros sir_flow_continuous_on_segment[OF t_in \<open>0 \<le> t\<close>])
   show ?thesis
-    using linear_ode_nonneg[OF \<open>0 < t\<close> f_cont S_ode _ nonneg(1)]
-    by simp
+  proof (rule linear_ode_nonneg[where a=0 and b=t and X="?S" and f="?f" and t=t])
+    show "0 < t" by fact
+    show "continuous_on {0..t} ?f" by fact
+    show "\<And>s. s \<in> {0..t} \<Longrightarrow> (?S has_real_derivative ?f s * ?S s) (at s)"
+      by (rule S_ode)
+    show "t \<in> {0..t}" using \<open>0 < t\<close> by simp
+    show "0 \<le> ?S 0" using nonneg(1) by simp
+  qed
 qed
 
 lemma sir_flow_nonneg_I:
@@ -429,8 +563,14 @@ next
   have f_cont: "continuous_on {0..t} ?f"
     by (intro continuous_intros sir_flow_continuous_on_segment[OF t_in \<open>0 \<le> t\<close>])
   show ?thesis
-    using linear_ode_nonneg[OF \<open>0 < t\<close> f_cont I_ode _ nonneg(2)]
-    by simp
+  proof (rule linear_ode_nonneg[where a=0 and b=t and X="?I_comp" and f="?f" and t=t])
+    show "0 < t" by fact
+    show "continuous_on {0..t} ?f" by fact
+    show "\<And>s. s \<in> {0..t} \<Longrightarrow> (?I_comp has_real_derivative ?f s * ?I_comp s) (at s)"
+      by (rule I_ode)
+    show "t \<in> {0..t}" using \<open>0 < t\<close> by simp
+    show "0 \<le> ?I_comp 0" using nonneg(2) by simp
+  qed
 qed
 
 lemma sir_flow_nonneg_R:
@@ -445,18 +585,20 @@ next
   case False
   then have "0 < t" using \<open>0 \<le> t\<close> by auto
   let ?fl = "sir_c1.flow0 \<beta> \<gamma> x0"
+  let ?R = "\<lambda>s. ?fl s $ 3"
+  let ?g = "\<lambda>s. \<gamma> * (?fl s $ 2)"
   have R_deriv: "\<And>s. s \<in> {0..t} \<Longrightarrow>
-    ((\<lambda>t. ?fl t $ 3) has_real_derivative \<gamma> * (?fl s $ 2)) (at s)"
+    (?R has_real_derivative ?g s) (at s)"
   proof -
     fix s assume "s \<in> {0..t}"
     then have s_in: "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
       using sir_ivl_mem[OF t_in] by auto
     have "((\<lambda>t. ?fl t $ 3) has_real_derivative (sir_vf \<beta> \<gamma> (?fl s)) $ 3) (at s)"
       by (rule sir_flow_component_deriv[OF s_in])
-    then show "((\<lambda>t. ?fl t $ 3) has_real_derivative \<gamma> * (?fl s $ 2)) (at s)"
+    then show "(?R has_real_derivative ?g s) (at s)"
       by (simp add: sir_vf_components)
   qed
-  have "\<And>s. s \<in> {0..t} \<Longrightarrow> 0 \<le> \<gamma> * (?fl s $ 2)"
+  have g_nonneg: "\<And>s. s \<in> {0..t} \<Longrightarrow> 0 \<le> ?g s"
   proof -
     fix s assume "s \<in> {0..t}"
     then have s_in: "s \<in> sir_c1.existence_ivl0 \<beta> \<gamma> x0"
@@ -465,12 +607,18 @@ next
     then show "0 \<le> \<gamma> * (?fl s $ 2)"
       using sir_flow_nonneg_I[OF assms(1-5) s_in] assms(2) by auto
   qed
-  then show ?thesis
-    using nonneg_deriv_nonneg[OF \<open>0 < t\<close> R_deriv _ _ nonneg(3)]
-    by auto
+  show ?thesis
+  proof (rule nonneg_deriv_nonneg[where a=0 and b=t and X="?R" and g="?g" and t=t])
+    show "0 < t" by fact
+    show "\<And>s. s \<in> {0..t} \<Longrightarrow> (?R has_real_derivative ?g s) (at s)"
+      by (rule R_deriv)
+    show "\<And>s. s \<in> {0..t} \<Longrightarrow> 0 \<le> ?g s"
+      by (rule g_nonneg)
+    show "t \<in> {0..t}" using \<open>0 < t\<close> by simp
+    show "0 \<le> ?R 0" using nonneg(3) by simp
+  qed
 qed
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: forward invariance complete\n"\<close>
 
 section \<open>Global Forward Existence\<close>
 
@@ -487,37 +635,40 @@ lemma sir_simplex_compact:
   assumes "N \<ge> 0"
   shows "compact (sir_simplex N)"
 proof -
-  have "sir_simplex N \<subseteq> cball 0 N"
-  proof
-    fix x :: "real^3" assume "x \<in> sir_simplex N"
+  let ?box = "{0..(\<chi> i. N)} :: (real^3) set"
+  let ?sum = "{x :: real^3. x$1 + x$2 + x$3 = N}"
+  have simplex_eq: "sir_simplex N = ?box \<inter> ?sum"
+  proof (rule equalityI; rule subsetI)
+    fix x :: "real^3"
+    assume "x \<in> sir_simplex N"
     then have h: "x$1 \<ge> 0" "x$2 \<ge> 0" "x$3 \<ge> 0" "x$1 + x$2 + x$3 = N"
       unfolding sir_simplex_def by auto
-    have "norm x \<le> N"
+    have coords: "\<And>i :: 3. 0 \<le> x$i \<and> x$i \<le> N"
     proof -
-      have comp_le: "\<And>i :: 3. \<bar>x$i\<bar> \<le> N"
-      proof -
-        fix i :: 3
-        have "x$i \<ge> 0 \<and> x$i \<le> N"
-          using h by (cases i rule: exhaust_3) linarith+
-        then show "\<bar>x$i\<bar> \<le> N" by auto
-      qed
-      have "norm x \<le> sum (\<lambda>i. \<bar>x$i\<bar>) UNIV"
-        by (rule norm_le_l1)
-      also have "... \<le> sum (\<lambda>i :: 3. N) UNIV"
-        by (rule sum_mono[OF comp_le])
-      also have "... = 3 * N" by simp
-      finally show "norm x \<le> N"
-        using h by linarith
+      fix i :: 3
+      have "i = 1 \<or> i = 2 \<or> i = 3"
+        using exhaust_3[of i] by auto
+      then show "0 \<le> x$i \<and> x$i \<le> N"
+        using h by auto
     qed
-    then show "x \<in> cball 0 N" by (simp add: dist_norm)
+    show "x \<in> ?box \<inter> ?sum"
+      using h coords by (simp add: less_eq_vec_def)
+  next
+    fix x :: "real^3"
+    assume "x \<in> ?box \<inter> ?sum"
+    then show "x \<in> sir_simplex N"
+      unfolding sir_simplex_def by (simp add: less_eq_vec_def)
   qed
-  moreover have "closed (sir_simplex N)"
-    unfolding sir_simplex_def
-    by (intro closed_Collect_conj closed_Collect_le closed_Collect_eq continuous_intros)
-  ultimately show ?thesis
-    using compact_eq_bounded_closed bounded_subset[OF bounded_cball]
-    by blast
+  have compact_box: "compact ?box"
+    by simp
+  have closed_sum: "closed ?sum"
+    by (intro closed_Collect_eq continuous_intros)
+  have "compact (?box \<inter> ?sum)"
+    by (rule compact_Int_closed[OF compact_box closed_sum])
+  then show ?thesis
+    by (simp add: simplex_eq)
 qed
+
 
 lemma sir_simplex_subset_UNIV: "sir_simplex N \<subseteq> (UNIV :: (real^3) set)"
   by simp
@@ -531,6 +682,7 @@ lemma sir_flow_in_simplex:
   using sir_flow_nonneg_S[OF assms] sir_flow_nonneg_I[OF assms]
         sir_flow_nonneg_R[OF assms] sir_flow_conservation[OF assms(6)]
   by auto
+
 
 theorem sir_global_existence:
   assumes "0 < \<beta>" "0 < \<gamma>"
@@ -552,7 +704,6 @@ next
   show "0 \<le> t" by fact
 qed
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: global forward existence complete\n"\<close>
 
 section \<open>Bridge to Scalar SIR Locale\<close>
 
@@ -695,30 +846,58 @@ proof -
     unfolding has_vderiv_on_def
   proof
     fix s assume s_in: "s \<in> {0..b}"
+    have S_at: "(S' has_derivative (*) (- \<beta> * S' s * I' s)) (at s)"
+      using ode_S'[OF s_in] unfolding has_field_derivative_def .
     have S_hd: "(S' has_derivative (\<lambda>h. h * (- \<beta> * S' s * I' s))) (at s within {0..b})"
-      using ode_S'[OF s_in, unfolded has_field_derivative_def]
-      by (auto simp: mult.commute intro: has_derivative_at_withinI)
+    proof (rule has_derivative_eq_rhs)
+      show "(S' has_derivative (*) (- \<beta> * S' s * I' s)) (at s within {0..b})"
+        by (rule has_derivative_at_withinI[OF S_at])
+      show "(*) (- \<beta> * S' s * I' s) = (\<lambda>h. h * (- \<beta> * S' s * I' s))"
+        by (simp add: fun_eq_iff mult.commute)
+    qed
+    have I_at: "(I' has_derivative (*) (\<beta> * S' s * I' s - \<gamma> * I' s)) (at s)"
+      using ode_I'[OF s_in] unfolding has_field_derivative_def .
     have I_hd: "(I' has_derivative (\<lambda>h. h * (\<beta> * S' s * I' s - \<gamma> * I' s))) (at s within {0..b})"
-      using ode_I'[OF s_in, unfolded has_field_derivative_def]
-      by (auto simp: mult.commute intro: has_derivative_at_withinI)
+    proof (rule has_derivative_eq_rhs)
+      show "(I' has_derivative (*) (\<beta> * S' s * I' s - \<gamma> * I' s)) (at s within {0..b})"
+        by (rule has_derivative_at_withinI[OF I_at])
+      show "(*) (\<beta> * S' s * I' s - \<gamma> * I' s) =
+        (\<lambda>h. h * (\<beta> * S' s * I' s - \<gamma> * I' s))"
+        by (simp add: fun_eq_iff mult.commute)
+    qed
+    have R_at: "(R' has_derivative (*) (\<gamma> * I' s)) (at s)"
+      using ode_R'[OF s_in] unfolding has_field_derivative_def .
     have R_hd: "(R' has_derivative (\<lambda>h. h * (\<gamma> * I' s))) (at s within {0..b})"
-      using ode_R'[OF s_in, unfolded has_field_derivative_def]
-      by (auto simp: mult.commute intro: has_derivative_at_withinI)
+    proof (rule has_derivative_eq_rhs)
+      show "(R' has_derivative (*) (\<gamma> * I' s)) (at s within {0..b})"
+        by (rule has_derivative_at_withinI[OF R_at])
+      show "(*) (\<gamma> * I' s) = (\<lambda>h. h * (\<gamma> * I' s))"
+        by (simp add: fun_eq_iff mult.commute)
+    qed
+    have y_repr: "y = (\<lambda>u. S' u *\<^sub>R axis (1::3) (1::real) +
+        I' u *\<^sub>R axis (2::3) 1 + R' u *\<^sub>R axis (3::3) 1)"
+    proof (rule ext)
+      fix u
+      show "y u = S' u *\<^sub>R axis (1::3) (1::real) +
+          I' u *\<^sub>R axis (2::3) 1 + R' u *\<^sub>R axis (3::3) 1"
+        apply (simp add: y_def vec_eq_iff axis_def)
+        using exhaust_3 by blast
+    qed
+    have y_deriv_raw:
+      "(y has_derivative
+        (\<lambda>h :: real. (h * (- \<beta> * S' s * I' s)) *\<^sub>R axis (1::3) (1::real) +
+             (h * (\<beta> * S' s * I' s - \<gamma> * I' s)) *\<^sub>R axis (2::3) 1 +
+             (h * (\<gamma> * I' s)) *\<^sub>R axis (3::3) 1)) (at s within {0..b})"
+      unfolding y_repr
+      by (intro derivative_intros S_hd I_hd R_hd)
     have "(y has_derivative (\<lambda>h. h *\<^sub>R sir_vf \<beta> \<gamma> (y s))) (at s within {0..b})"
-      unfolding has_derivative_componentwise_within
-    proof
-      fix b' :: "real^3" assume "b' \<in> Basis"
-      then obtain i :: 3 where bi: "b' = axis i 1" by (auto simp: Basis_vec_def)
-      show "((\<lambda>x. y x \<bullet> b') has_derivative (\<lambda>h. (h *\<^sub>R sir_vf \<beta> \<gamma> (y s)) \<bullet> b')) (at s within {0..b})"
-      proof -
-        have eq1: "\<And>x. y x \<bullet> axis i 1 = y x $ i"
-          by (simp add: inner_axis)
-        have eq2: "\<And>h. (h *\<^sub>R sir_vf \<beta> \<gamma> (y s)) \<bullet> axis i 1 = h * (sir_vf \<beta> \<gamma> (y s) $ i)"
-          by (simp add: inner_axis)
-        show ?thesis unfolding bi eq1 eq2
-          using exhaust_3[of i] S_hd I_hd R_hd
-          by (elim disjE; simp add: y_def sir_vf_def algebra_simps)
-      qed
+    proof (rule has_derivative_eq_rhs[OF y_deriv_raw])
+      show "(\<lambda>h :: real. (h * (- \<beta> * S' s * I' s)) *\<^sub>R axis (1::3) (1::real) +
+             (h * (\<beta> * S' s * I' s - \<gamma> * I' s)) *\<^sub>R axis (2::3) 1 +
+             (h * (\<gamma> * I' s)) *\<^sub>R axis (3::3) 1) =
+        (\<lambda>h. h *\<^sub>R sir_vf \<beta> \<gamma> (y s))"
+        apply (simp add: fun_eq_iff y_def sir_vf_def vec_eq_iff axis_def algebra_simps)
+        using exhaust_3 by blast
     qed
     then show "(y has_vector_derivative sir_vf \<beta> \<gamma> (y s)) (at s within {0..b})"
       by (simp add: has_vector_derivative_def)
@@ -744,6 +923,5 @@ qed
 
 end
 
-ML_command \<open>File.append (Path.explode "/home/david/repos/isabelle-projects/vcm-sir-checkpoints.log") "VCM_CHECKPOINT: SIR_ODE locale complete\n"\<close>
 
 end
