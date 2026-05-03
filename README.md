@@ -11,8 +11,8 @@ This project provides machine-checked formalizations of:
 - **Conservation laws** for compartmental systems (total population is constant)
 - **Monotonicity** of susceptible and recovered compartments
 - **Phase plane invariant** — the Kermack–McKendrick invariant V = I + S − (γ/β)ln S
-- **Epidemic threshold** — basic reproduction number R₀ = βS(a)/γ with global
-  I-monotonicity when R₀ ≤ 1
+- **Epidemic threshold** — initial effective threshold ratio βS(a)/γ with global
+  I-monotonicity when that ratio is at most 1
 - **Stationary infection** condition (peak of the infection curve)
 - **Simplex invariance** (all compartments bounded between 0 and N)
 - **Picard–Lindelöf existence/uniqueness** for the SIR vector field, with global
@@ -38,7 +38,7 @@ the qualitative SIR theorems to that flow.
 | `SIR_Forward_Invariance` | Derives S≥0, I≥0, R≥0 from initial conditions via `linear_ode_nonneg` and `nonneg_deriv_nonneg` |
 | `SIR_Conservation` | Total population N = S + I + R is constant (via framework) |
 | `SIR_Monotonicity` | S is nonincreasing, R is nondecreasing (via framework + forward invariance) |
-| `SIR_Threshold` | Epidemic growth iff S > γ/β; R₀ = βS(a)/γ; `initial_epidemic_decline`; `I_nonincreasing_if_R_zero_le_one` |
+| `SIR_Threshold` | Epidemic growth iff S > γ/β; initial effective threshold ratio βS(a)/γ; `initial_epidemic_decline`; `I_nonincreasing_if_R_zero_le_one` |
 | `SIR_Peak` | Stationary infection condition: I'(t) = 0 iff S(t) = γ/β |
 | `SIR_Phase_Plane` | Kermack–McKendrick invariant: V(t) = const on trajectories with S > 0 |
 | `SIR_Invariant` | Simplex boundedness: 0 ≤ X(t) ≤ N for each compartment X |
@@ -76,6 +76,9 @@ Build time: ~12 seconds on a modern machine.
 - The framework handles **three-compartment** models. Generalization to
   n-compartment models via finite sums is planned for future work.
 - The global-existence bridge is forward in time from the initial instant `0`.
+- Terminology: βS(a)/γ is the initial effective threshold ratio, not the
+  disease-free basic reproduction number βN/γ; the historical Isabelle
+  identifier `R_zero` is retained only as a source-level name.
 
 ## Artifact Metadata
 
