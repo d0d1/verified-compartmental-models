@@ -32,11 +32,3 @@ session Verified_Compartmental_Models in work = VCM_Base +
   document_files (in "../document")
     "root.tex"
     "root.bib"
-
-session VCM_Minimal_Diag in work_diag = VCM_Base +
-  description \<open>
-    Diagnostic-only session for measuring minimal child-theory startup over VCM_Base.
-  \<close>
-  options [timeout = 7200, document = false, quick_and_dirty]
-  theories
-    SIR_Minimal_Diag
