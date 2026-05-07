@@ -5,12 +5,12 @@
 **There is no "v1" or reduced scope. The full project target is:**
 
 A complete publishable Isabelle/HOL formalization of a reusable compartmental
-ODE framework with SIR as a fully supported case study, plus aligned
-AFP-style and JFR-style papers.
+ODE framework with SIR as a fully supported case study, plus aligned public
+artifact documentation.
 
 ### Required for completion (ALL must be satisfied):
 
-1. **Audit**: Every paper claim maps to an actual Isabelle theorem name.
+1. **Audit**: Every public documentation claim maps to an actual Isabelle theorem name.
 2. **Honesty**: No unsupported or overclaimed results anywhere.
 3. **Forward invariance**: Prove nonnegative orthant forward invariance from
    nonnegative initial conditions.
@@ -21,9 +21,9 @@ AFP-style and JFR-style papers.
 6. **Serious SIR development**: Strengthen beyond algebraic consequences —
    publishable-quality results expected.
 7. **No sorry/admit/oops**: Zero unproven holes in claimed results.
-8. **Theorem inventory**: Exact mapping of theorems to paper claims, with
+8. **Theorem inventory**: Exact mapping of theorems to documentation claims, with
    true readiness status.
-9. **Papers**: AFP-style and JFR-style papers aligned with actual formalization.
+9. **Documentation**: Public artifact documentation aligned with actual formalization.
 10. **Build clean**: `isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models`
     passes with no errors.
 
@@ -47,6 +47,4 @@ This repo contains the Isabelle/HOL formalization:
 ## Build
 
 Use `isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models`
-when AFP is not registered as an Isabelle component. Prefer
-`../../shared/bin/build-all.sh` from the parent project when using the shared
-tooling.
+when AFP is not registered as an Isabelle component.

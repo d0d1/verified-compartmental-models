@@ -55,10 +55,6 @@ Requires **Isabelle 2024** and **AFP 2024** with the
 `Ordinary_Differential_Equations` session available.
 
 ```bash
-# From the parent isabelle-projects directory:
-./shared/bin/build-all.sh
-
-# Or directly, passing the AFP theories directory if AFP is not registered:
 isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models
 ```
 
@@ -88,15 +84,11 @@ tens of seconds on a small Linux VM.
 - **Session**: Verified_Compartmental_Models
 - **External AFP session**: Ordinary_Differential_Equations
 - **Proof holes**: 0 (zero sorry/admit/oops)
-- **Companion paper**: [verified-compartmental-models-paper](https://github.com/d0d1/verified-compartmental-models-paper)
 
 ## Dependencies
 
 - Isabelle 2024
 - AFP 2024, specifically the `Ordinary_Differential_Equations` session
-
-Shared Isabelle tooling is managed at the parent project level — see the
-isabelle-projects repository for common infrastructure.
 
 ## License
 
