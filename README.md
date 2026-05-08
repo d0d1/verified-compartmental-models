@@ -13,7 +13,9 @@ This project provides machine-checked formalizations of:
 - **Phase plane invariant** — the Kermack–McKendrick invariant V = I + S − (γ/β)ln S
 - **Epidemic threshold** — initial effective threshold ratio βS(a)/γ with global
   I-monotonicity when that ratio is at most 1
-- **Stationary infection** condition (peak of the infection curve)
+- **Stationary infection** condition — under `I(t) > 0`, `I'(t) = 0` iff
+  `S(t) = γ/β`; the artifact does not prove existence, uniqueness, or global
+  maximality of an infection peak (historical source identifier `peak_iff`)
 - **Simplex invariance** (all compartments bounded between 0 and N)
 - **Picard–Lindelöf existence/uniqueness** for the SIR vector field, with global
   forward existence for nonnegative initial data
