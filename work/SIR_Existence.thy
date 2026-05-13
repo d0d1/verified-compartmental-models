@@ -6,8 +6,8 @@
     2. Local existence and uniqueness of solutions (from c1_on_open).
     3. Global forward existence for nonnegative initial data via conservation
        and the continuation lemma (flow_in_compact_right_existence).
-    4. Bridge to the scalar SIR_solution locale, making all 56 existing
-       theorems unconditional.
+    4. Bridge to the scalar SIR_solution locale under the SIR_ODE locale
+       assumptions and on each nontrivial interval [0,b].
 
   License: BSD-3-Clause
 *)
@@ -710,8 +710,8 @@ section \<open>Bridge to Scalar SIR Locale\<close>
 text \<open>
   We define a new locale @{text SIR_ODE} that takes scalar initial conditions
   and derives the existence of the unique solution. The components of the flow
-  satisfy the scalar SIR ODEs, giving a sublocale relationship with
-  @{locale SIR_solution}. This makes all 56 existing theorems unconditional.
+  satisfy the scalar SIR ODEs, giving access to @{locale SIR_solution}
+  results under the @{text SIR_ODE} assumptions.
 \<close>
 
 locale SIR_ODE =
@@ -793,8 +793,9 @@ proof -
 qed
 
 text \<open>
-  Bridge: for any interval $[0, b]$ with $b > 0$, we get a valid @{locale SIR_solution}
-  interpretation. This makes all existing SIR theorems unconditional.
+  Bridge: under the @{locale SIR_ODE} assumptions and for any interval
+  $[0, b]$ with $b > 0$, we get a valid @{locale SIR_solution}
+  interpretation for the constructed flow.
 \<close>
 
 lemma sir_solution_on_interval:

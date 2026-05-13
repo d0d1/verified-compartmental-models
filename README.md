@@ -65,15 +65,14 @@ Requires **Isabelle 2024** and **AFP 2024** with the
 isabelle build -d /path/to/afp-2024/thys -d . Verified_Compartmental_Models
 ```
 
-Build time depends on hardware and cache state; recent validations complete in
-tens of seconds on a small Linux VM.
+Build time depends on hardware and cache state.
 
 ## Assumptions and Scope
 
 - **Two-layer structure**: `SIR_solution` records qualitative theorems for any
   differentiable solution on a finite interval. `SIR_ODE` constructs the unique
-  forward solution from nonnegative initial data and instantiates
-  `SIR_solution` on every interval `[0,b]`.
+  forward solution from positive parameters and nonnegative initial data, and
+  instantiates `SIR_solution` on every nontrivial interval `[0,b]` with `b > 0`.
 - **Nonnegativity derived**: forward invariance is proved from nonnegative
   initial conditions using the integrating factor and then applied to the unique
   Picard–Lindelöf flow.

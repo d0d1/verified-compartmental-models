@@ -84,10 +84,9 @@ text \<open>
   The SIR vector field is $C^1$, hence locally Lipschitz. Conservation and
   forward invariance confine the flow to a compact simplex, giving global
   forward existence via @{text flow_in_compact_right_existence}.
-  The locale @{locale SIR_ODE} provides the unconditional bridge: given
-  initial conditions alone, it constructs the unique global solution and
-  interprets @{locale SIR_solution}, making all the above results
-  unconditional consequences of the initial-value problem.
+  Given positive parameters and nonnegative initial conditions, the locale
+  @{locale SIR_ODE} constructs the unique forward solution and interprets
+  @{locale SIR_solution} on each nontrivial interval @{text "[0,b]"}.
 \<close>
 
 
