@@ -1,8 +1,8 @@
 (*
   SIR_Main.thy — Main entry point importing all SIR theories.
 
-  This theory provides a unified view of the complete SIR formalization.
-  It imports all component theories and provides a summary of the main results.
+  This theory imports the component theories for the SIR development and
+  summarizes the selected qualitative properties formalized in this artifact.
 
   License: BSD-3-Clause
 *)
