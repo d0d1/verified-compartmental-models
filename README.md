@@ -44,6 +44,11 @@ the qualitative SIR theorems to that flow.
 | `SIR_Peak` | Stationary infection condition: I'(t) = 0 iff S(t) = γ/β |
 | `SIR_Phase_Plane` | Kermack–McKendrick invariant: V(t) = const on trajectories with S > 0 |
 | `SIR_Invariant` | Simplex boundedness: 0 ≤ X(t) ≤ N for each compartment X |
+
+### Final session theories (`work/`)
+
+| Theory | Contents |
+|--------|----------|
 | `SIR_Existence` | SIR vector field on ℝ³; C¹ proof; Picard–Lindelöf flow; conservation, global forward existence, and scalar-locale bridge for the unique solution |
 | `SIR_Main` | Entry point importing all theories; summary documentation |
 
