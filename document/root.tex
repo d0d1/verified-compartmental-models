@@ -15,8 +15,8 @@
 
 \begin{abstract}
 We present a reusable Isabelle/HOL framework for certified reasoning about
-compartmental ODE models, together with a complete instantiation for the
-classical SIR (Susceptible--Infectious--Recovered) epidemic model.
+compartmental ODE models, together with an SIR instantiation of the framework
+for the selected qualitative properties formalized here.
 
 The framework's central result is a generic forward invariance theorem for
 linear ODEs: any equation $X' = f(t) \cdot X$ with continuous $f$ preserves
@@ -46,9 +46,9 @@ pharmacokinetics, and systems biology. The SIR model, introduced by
 Kermack and McKendrick\nobreakspace{}\cite{kermack1927}, partitions a population into susceptible~(S),
 infectious~(I), and recovered~(R) compartments governed by a system of ODEs.
 
-This development formalizes the key qualitative properties of the SIR model
+This development formalizes selected qualitative properties of the SIR model
 in Isabelle/HOL, structured as a reusable compartmental model framework
-with the SIR model as its first instantiation.
+with the SIR instantiation developed in this artifact.
 
 \paragraph{Contributions.}
 \begin{itemize}
@@ -59,8 +59,9 @@ with the SIR model as its first instantiation.
 \item Monotonicity corollaries for compartments with signed derivatives.
 \item A locale-based SIR formalization proving forward invariance, explicit
       solutions, conservation, monotonicity, the Kermack--McKendrick invariant,
-      the initial effective threshold ratio with global epidemic-decline
-      theorem, and the stationary infection condition.
+      the initial effective threshold ratio, an interval-wide \(I\)-nonincreasing
+      theorem under \(\beta S(a)/\gamma \le 1\), and the stationary infection
+      condition.
 \item A Picard--Lindel\"of-backed SIR flow construction proving global forward
       existence for nonnegative initial data and applying the scalar theorems
       to the unique ODE solution.
